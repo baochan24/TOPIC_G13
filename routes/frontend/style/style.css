@@ -1,0 +1,199 @@
+/* ===== RESET NHẸ ===== */
+body {
+  margin: 0;
+  background-color: #f5f6fa;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #343a40, #495057);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .nav-link {
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+  background-color: rgba(0, 123, 255, 0.2);
+  border-left: 4px solid #007bff;
+}
+
+.sidebar .badge {
+  font-size: 0.75rem;
+  padding: 0.25em 0.5em;
+}
+
+.sidebar .user-profile {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .avatar {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ===== MAIN ===== */
+main {
+  margin-left: 280px;
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}
+
+/* ===== TOP BAR ===== */
+.navbar {
+  height: 60px;
+}
+
+/* ===== BANNER ===== */
+.banner {
+  background: linear-gradient(135deg, #2c3e50, #4ca1af);
+  padding: 40px 20px;
+  margin-bottom: 30px;
+}
+
+/* ===== DASHBOARD CARDS ===== */
+.dashboard-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== BANNER ===== */
+.banner {
+  background: linear-gradient(135deg, #2c3e50, #4ca1af);
+  padding: 60px 20px;
+  margin-bottom: 30px;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 1s ease-out;
+}
+
+.banner h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.banner p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== DASHBOARD SECTIONS ===== */
+.dashboard-section {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* ===== STAT CARDS ===== */
+.stat-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-card h3 {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.stat-card small {
+  font-size: 0.85rem;
+}
+
+/* ===== WELCOME ALERT ===== */
+.alert-info {
+  background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+  border-color: #bee5eb;
+}
+
+/* ===== QUICK ACTIONS ===== */
+.dashboard-card .btn {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card .btn:hover {
+  transform: scale(1.05);
+}
+
+/* ===== INVENTORY TABLE ===== */
+#inventoryTable {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#inventoryTable thead {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .banner h2 {
+    font-size: 2rem;
+  }
+  
+  .stat-box {
+    padding: 20px 15px;
+  }
+  
+  .stat-box h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== LOADING SPINNER ===== */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

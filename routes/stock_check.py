@@ -20,18 +20,18 @@ def scan_imei(check_id):
     item = cursor.fetchone()
 
     if item:
-        system_status = item["status"]
-        is_matched = (system_status == actual_status)
+        expected_status = item["status"]
+        is_matched = (expected_status == actual_status)
     else:
-        system_status = None
+        expected_status = None
         is_matched = False
         actual_status = "EXTRA"
 
     cursor.execute("""
         INSERT INTO stock_check_items
-        (check_id, imei_serial, system_status, actual_status, is_matched)
+        (check_id, imei_serial, expected_status, actual_status, is_matched)
         VALUES (%s,%s,%s,%s,%s)
-    """, (check_id, imei, system_status, actual_status, is_matched))
+    """, (check_id, imei, expected_status, actual_status, is_matched))
 
     conn.commit()
     cursor.close()
@@ -39,7 +39,7 @@ def scan_imei(check_id):
 
     return jsonify({
         "imei": imei,
-        "system_status": system_status,
+        "expected_status": expected_status,
         "actual_status": actual_status,
         "matched": is_matched
     }), 201
@@ -52,7 +52,7 @@ def check_result(check_id):
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT imei_serial, system_status, actual_status, is_matched
+        SELECT imei_serial, expected_status, actual_status, is_matched
         FROM stock_check_items
         WHERE check_id = %s
     """, (check_id,))
@@ -71,7 +71,7 @@ def adjust_stock(check_id):
 
     # 1. Lấy các IMEI KHÔNG KHỚP
     cursor.execute("""
-        SELECT imei_serial, system_status, actual_status
+        SELECT imei_serial, expected_status, actual_status
         FROM stock_check_items
         WHERE check_id = %s
           AND is_matched = 0

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Electronic Store Management</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Font Awesome -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./style/style.css?v=2">
+</head>
+
+<body>
+
+<!-- SCRIPT HIỂN THỊ THỜI GIAN -->
+<script>
+  setInterval(() => {
+    const timeEl = document.getElementById("time");
+    if (timeEl) {
+      timeEl.innerText = new Date().toLocaleString("vi-VN");
+    }
+  }, 1000);
+</script>
+
+<!-- ================= LAYOUT ================= -->
+<div class="d-flex">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar bg-gradient-dark text-white p-4">
+    <!-- LOGO & BRAND -->
+    <div class="text-center mb-4">
+      <i class="fa-solid fa-warehouse fa-3x text-white mb-2"></i>
+      <h5 class="fw-bold mb-0">EMS</h5>
+      <small class="text-white">Electronic Management System</small>
+    </div>
+
+    <!-- USER PROFILE -->
+    <div class="user-profile mb-4 p-3 bg-dark rounded">
+      <div class="d-flex align-items-center">
+        <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div>
+          <div class="fw-bold">Nhân viên kho</div>
+          <small class="text-muted">Online</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <ul class="nav flex-column gap-2">
+      <li class="nav-item">
+        <a class="nav-link text-white active d-flex align-items-center" href="#">
+          <i class="fa-solid fa-tachometer-alt me-3"></i>
+          <span>Bảng điều khiển</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="categories.html">
+          <i class="fa-solid fa-layer-group me-3"></i>
+          <span>Danh mục</span>
+          <span class="badge bg-primary ms-auto">3</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="products.html">
+          <i class="fa-solid fa-box me-3"></i>
+          <span>Sản phẩm</span>
+          <span class="badge bg-success ms-auto">12</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="stock_check.html">
+          <i class="fa-solid fa-barcode me-3"></i>
+          <span>Kiểm kê IMEI</span>
+          <span class="badge bg-warning ms-auto">!</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- SIDEBAR FOOTER -->
+    <div class="mt-auto pt-4 border-top border-secondary">
+      <small class="text-muted">
+        <i class="fa-solid fa-code-branch me-1"></i><span class="text-white">Version 1.0.0</span><br>
+        <i class="fa-solid fa-clock me-1"></i>Last sync: 2 min ago
+      </small>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="flex-grow-1">
+
+    <!-- TOP BAR -->
+    <nav class="navbar navbar-light bg-light px-4 bg-light">
+      <span class="fw-bold">Electronic Store Management</span>
+
+      <div class="text-muted small">
+        <i class="fa-regular fa-user"></i> Nhân viên kho |
+        <i class="fa-regular fa-clock"></i>
+        <span id="time"></span>
+      </div>
+    </nav>
+
+    <!-- BANNER -->
+    <section class="banner text-black text-center">
+      <h2 class="fw-bold">Hệ thống quản lý cửa hàng điện tử</h2>
+      <p class="mb-0">
+        Quản lý kho – sản phẩm – IMEI chuyên nghiệp
+      </p>
+    </section>
+
+    <!-- DASHBOARD -->
+    <div class="container mt-4">
+
+      <h4 class="mb-4 text-primary">
+        <i class="fa-solid fa-tachometer-alt me-2"></i>Bảng điều khiển
+      </h4>
+
+      <!-- WELCOME SECTION -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-info border-0 shadow-sm" role="alert">
+            <h5 class="alert-heading">
+              <i class="fa-solid fa-hand-wave me-2"></i>Chào mừng đến với EMS!
+            </h5>
+            <p class="mb-0">Hôm nay là <strong id="currentDate"></strong>. Bạn có <span id="totalItems">0</span> thiết bị trong kho.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="card dashboard-card h-100 text-center">
+            <div class="card-body">
+              <i class="fa-solid fa-layer-group fa-2x text-primary mb-3"></i>
+              <h6>Danh mục</h6>
+              <a href="categories.html" class="btn btn-outline-primary btn-sm w-100">Quản lý</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card dashboard-card h-100 text-center">
+            <div class="card-body">
+              <i class="fa-solid fa-box fa-2x text-success mb-3"></i>
+              <h6>Sản phẩm</h6>
+              <a href="products.html" class="btn btn-outline-success btn-sm w-100">Quản lý</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card dashboard-card h-100 text-center">
+            <div class="card-body">
+              <i class="fa-solid fa-barcode fa-2x text-warning mb-3"></i>
+              <h6>IMEI</h6>
+              <a href="stock_check.html" class="btn btn-outline-warning btn-sm w-100">Kiểm kê</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card dashboard-card h-100 text-center">
+            <div class="card-body">
+              <i class="fa-solid fa-chart-line fa-2x text-info mb-3"></i>
+              <h6>Báo cáo</h6>
+              <button class="btn btn-outline-info btn-sm w-100" onclick="loadStatistics()">Làm mới</button>
+            </div>
+          </div>
+        </div>
+      </div>
+       
+
+      <!-- STATISTICS CARDS -->
+      <div class="row text-center g-3 mb-4 dashboard-section">
+        <div class="col-md-6 col-lg-3">
+          <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                  <h3 id="catCount" class="mb-0"><span class="loading"></span></h3>
+                  <small class="text-muted">Danh mục</small>
+                </div>
+                <i class="fa-solid fa-tags fa-2x text-primary opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                  <h3 id="prodCount" class="mb-0"><span class="loading"></span></h3>
+                  <small class="text-muted">Sản phẩm</small>
+                </div>
+                <i class="fa-solid fa-box-open fa-2x text-success opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                  <h3 id="imeiCount" class="mb-0"><span class="loading"></span></h3>
+                  <small class="text-muted">IMEI tồn kho</small>
+                </div>
+                <i class="fa-solid fa-mobile-alt fa-2x text-warning opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                  <h3 id="defectCount" class="mb-0"><span class="loading"></span></h3>
+                  <small class="text-muted">Thiết bị lỗi</small>
+                </div>
+                <i class="fa-solid fa-exclamation-triangle fa-2x text-danger opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY TABLE -->
+      <div class="card dashboard-section">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="fa-solid fa-table me-2"></i>Thống kê tồn kho chi tiết
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="inventoryTable">
+              <thead class="table-dark">
+                <tr>
+                  <th><i class="fa-solid fa-hashtag me-1"></i>Sản phẩm</th>
+                  <th><i class="fa-solid fa-list me-1"></i>Tổng số</th>
+                  <th><i class="fa-solid fa-check-circle me-1"></i>Còn trong kho</th>
+                  <th><i class="fa-solid fa-shopping-cart me-1"></i>Đã bán</th>
+                  <th><i class="fa-solid fa-times-circle me-1"></i>Lỗi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="text-center"><span class="loading"></span> Đang tải dữ liệu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div> 
+
+    <!-- FOOTER -->
+    <footer class="text-center mt-10 text-muted">
+      <hr>
+      <p class="mb-0">
+        © 2026 – Electronic Store System | SE Project
+      </p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// Load statistics khi trang load
+document.addEventListener('DOMContentLoaded', loadStatistics);
+
+// Auto refresh every 10 seconds
+setInterval(loadStatistics, 10000);
+
+// BroadcastChannel để đồng bộ
+const statsChannel = new BroadcastChannel('stats-update');
+statsChannel.onmessage = function(e) {
+  if (e.data === 'update-stats') {
+    loadStatistics();
+  }
+};
+
+async function loadStatistics() {
+  console.log('Loading statistics...');
+  // Show loading
+  document.getElementById('catCount').innerHTML = '<span class="loading"></span>';
+  document.getElementById('prodCount').innerHTML = '<span class="loading"></span>';
+  document.getElementById('imeiCount').innerHTML = '<span class="loading"></span>';
+  document.getElementById('defectCount').innerHTML = '<span class="loading"></span>';
+  document.querySelector('#inventoryTable tbody').innerHTML = '<tr><td colspan="5" class="text-center"><span class="loading"></span> Đang tải dữ liệu...</td></tr>';
+
+  try {
+    // Set current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
+
+    // Danh mục
+    console.log('Fetching categories...');
+    const catResponse = await fetch('http://localhost:5000/categories/');
+    console.log('Categories response:', catResponse);
+    const categories = await catResponse.json();
+    console.log('Categories data:', categories);
+    document.getElementById('catCount').textContent = categories.length;
+
+    // Sản phẩm
+    console.log('Fetching products...');
+    const prodResponse = await fetch('http://localhost:5000/products/');
+    console.log('Products response:', prodResponse);
+    const products = await prodResponse.json();
+    console.log('Products data:', products);
+    document.getElementById('prodCount').textContent = products.length;
+
+    // Inventory report
+    console.log('Fetching inventory...');
+    const invResponse = await fetch('http://localhost:5000/inventory/');
+    console.log('Inventory response:', invResponse);
+    const inventory = await invResponse.json();
+    console.log('Inventory data:', inventory);
+    const totalInStock = inventory.reduce((sum, item) => sum + item.in_stock, 0);
+    document.getElementById('imeiCount').textContent = totalInStock;
+    document.getElementById('totalItems').textContent = totalInStock;
+
+    // Thiết bị lỗi (tạm 0)
+    document.getElementById('defectCount').textContent = '0';
+
+    // Populate bảng tồn kho
+    const tbody = document.querySelector('#inventoryTable tbody');
+    tbody.innerHTML = '';
+    inventory.forEach(item => {
+      const row = `
+        <tr>
+          <td>${item.product_id}</td>
+          <td>${item.total}</td>
+          <td>${item.in_stock}</td>
+          <td>${item.total - item.in_stock}</td>
+          <td>0</td> <!-- Placeholder cho lỗi -->
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+
+  } catch (error) {
+    console.error('Lỗi load statistics:', error);
+    // Hide loading on error
+    ['catCount', 'prodCount', 'imeiCount', 'defectCount'].forEach(id => {
+      document.getElementById(id).textContent = 'Error';
+    });
+    document.querySelector('#inventoryTable tbody').innerHTML = '<tr><td colspan="5" class="text-center">Lỗi tải dữ liệu</td></tr>';
+  }
+}
+</script>
+
+</body>
+</html>
+

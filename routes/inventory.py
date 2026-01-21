@@ -69,28 +69,27 @@ def import_item():
         cursor.close()
         conn.close()
 
-@inventory_bp.route("/", methods=["GET"])
-def list_inventory():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+# @inventory_bp.route("/", methods=["GET"])
+# def list_inventory():
+#     conn = get_db_connection()
+#     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
-        SELECT 
-            i.imei_serial,
-            i.status,
-            i.item_condition,
-            p.product_name,
-            p.brand
-        FROM items i
-        JOIN products p ON i.product_id = p.product_id
-        ORDER BY i.imei_serial
-    """)
+#     cursor.execute("""
+#         SELECT 
+#             i.imei_serial,
+#             i.status,
+#             p.product_name,
+#             p.brand
+#         FROM inventory i
+#         JOIN products p ON i.product_id = p.product_id
+#         ORDER BY i.imei_serial
+#     """)
 
-    items = cursor.fetchall()
-    cursor.close()
-    conn.close()
+#     items = cursor.fetchall()
+#     cursor.close()
+#     conn.close()
 
-    return jsonify(items), 200
+#     return jsonify(items), 200
 
 
 
@@ -243,7 +242,7 @@ def inventory_report():
     cursor.execute("""
         SELECT product_id,
                COUNT(*) AS total,
-               SUM(status='IN_STOCK') AS in_stock
+               SUM(CASE WHEN status='IN_STOCK' THEN 1 ELSE 0 END) AS in_stock
         FROM items
         GROUP BY product_id
     """)
