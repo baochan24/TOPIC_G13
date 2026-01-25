@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bảo hành | EMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="./style/style.css?v=2">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .page-container { max-width: 900px; margin: 20px auto; }
+    .card { border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.08); margin-bottom: 1rem; }
+    .back-btn { position: fixed; top: 16px; left: 16px; z-index: 1000; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="btn btn-secondary back-btn"><i class="fa-solid fa-arrow-left me-2"></i>Trang chủ</a>
+
+  <div class="container page-container">
+    <h4 class="mb-3"><i class="fa-solid fa-wrench me-2"></i>Bảo hành</h4>
+
+    <!-- 1. Tiếp nhận bảo hành -->
+    <div class="card">
+      <div class="card-header bg-primary text-white"><i class="fa-solid fa-inbox me-2"></i>1. Tiếp nhận bảo hành</div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3"><input type="text" id="recWarrantyId" class="form-control" placeholder="Mã phiếu BH (ví dụ: WR-xxx)"></div>
+          <div class="col-md-3"><input type="text" id="recImei" class="form-control" placeholder="IMEI *"></div>
+          <div class="col-md-2"><input type="text" id="recStaffId" class="form-control" placeholder="Staff ID *"></div>
+          <div class="col-md-2"><input type="text" id="recNote" class="form-control" placeholder="Ghi chú lỗi"></div>
+          <div class="col-md-2"><button class="btn btn-primary w-100" onclick="receiveWarranty()">Tiếp nhận</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Cập nhật tiến độ -->
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-tasks me-2"></i>2. Cập nhật tiến độ</div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3"><input type="text" id="updWarrantyId" class="form-control" placeholder="Mã phiếu BH *"></div>
+          <div class="col-md-2"><input type="text" id="updStaffId" class="form-control" placeholder="Staff ID *"></div>
+          <div class="col-md-3"><input type="text" id="updNote" class="form-control" placeholder="Ghi chú tiến độ"></div>
+          <div class="col-md-2"><label class="form-check"><input type="checkbox" id="updCompleted" class="form-check-input"> Hoàn thành</label></div>
+          <div class="col-md-2"><button class="btn btn-warning w-100" onclick="updateProgress()">Cập nhật</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Trả máy bảo hành -->
+    <div class="card">
+      <div class="card-header bg-success text-white"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>3. Trả máy bảo hành</div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3"><input type="text" id="retWarrantyId" class="form-control" placeholder="Mã phiếu BH *"></div>
+          <div class="col-md-2"><input type="text" id="retStaffId" class="form-control" placeholder="Staff ID *"></div>
+          <div class="col-md-2"><input type="number" id="retFee" class="form-control" placeholder="Phí DV (0)" value="0"></div>
+          <div class="col-md-2"><button class="btn btn-success w-100" onclick="returnDevice()">Trả máy</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/warranty.js"></script>
+</body>
+</html>

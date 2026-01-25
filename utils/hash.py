@@ -1,7 +1,16 @@
-import hashlib
+import bcrypt
 
-def hash_password(password):
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
 
-def verify_password(password, hashed):
-    return hash_password(password) == hashed
+
+def check_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(
+        password.encode("utf-8"),
+        hashed_password.encode("utf-8")
+    )
+print(bcrypt.hashpw(b'123456', bcrypt.gensalt()).decode())
+

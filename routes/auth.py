@@ -1,45 +1,58 @@
-from flask import Blueprint, request, jsonify, session
-from models.user import User
-from utils.hash import hash_password, verify_password
+from flask import Blueprint, request, jsonify
+from db import get_db_connection
+from utils.hash import check_password
+from utils.auth_middleware import generate_token
+import uuid
 
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+authLogin_bp = Blueprint("auth_login", __name__, url_prefix="/auth")
 
-@auth_bp.route("/login", methods=["POST"])
+@authLogin_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"message": "Missing username or password"}), 400
 
-    user = User.get_user_by_username(username)
-    if user and verify_password(password, user.password):
-        session['user_id'] = user.id
-        session['username'] = user.username
-        session['role'] = user.role
-        return jsonify({"message": "Login successful", "role": user.role})
-    return jsonify({"message": "Invalid credentials"}), 401
+    username = data['username']
+    password = data['password']
 
-@auth_bp.route("/logout", methods=["POST"])
-def logout():
-    session.clear()
-    return jsonify({"message": "Logged out"})
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
-@auth_bp.route("/register", methods=["POST"])
-def register():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    role = data.get('role', 'employee')
+    cursor.execute("""
+        SELECT u.user_id, u.password_hash, r.role_name
+        FROM users u
+        JOIN user_roles ur ON u.user_id = ur.user_id
+        JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.username = %s
+        LIMIT 1
+    """, (username,))
 
-    if User.get_user_by_username(username):
-        return jsonify({"message": "User already exists"}), 400
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
-    hashed_password = hash_password(password)
-    User.create_user(username, hashed_password, role)
-    return jsonify({"message": "User created"}), 201
+    if not user or not check_password(password, user['password_hash']):
+        return jsonify({"message": "Invalid username or password"}), 401
 
-@auth_bp.route("/users", methods=["GET"])
-def get_users():
-    if session.get('role') != 'admin':
-        return jsonify({"message": "Admin access required"}), 403
-    users = User.get_all_users()
-    return jsonify(users)
+    token = generate_token(user['user_id'], user['role_name'])
+
+    # Log login
+    try:
+        log_conn = get_db_connection()
+        log_cursor = log_conn.cursor()
+        log_id = str(uuid.uuid4())
+        log_cursor.execute("""
+            INSERT INTO system_logs (log_id, user_id, action, ip_address)
+            VALUES (%s, %s, %s, %s)
+        """, (log_id, user['user_id'], 'LOGIN', request.remote_addr))
+        log_conn.commit()
+        log_cursor.close()
+        log_conn.close()
+    except Exception as e:
+        print(f"Log error: {e}")
+
+    return jsonify({
+        "token": token,
+        "role": user['role_name'],
+        "message": "Đăng nhập thành công"
+    })

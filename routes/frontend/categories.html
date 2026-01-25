@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="./style/style.css?v=2">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -81,10 +82,10 @@
         </h5>
         <div class="row">
           <div class="col-md-6">
-            <input id="categoryId" class="form-control mb-3" placeholder="Mã danh mục (ví dụ: CAT001)">
+            <input id="categoryName" class="form-control mb-3" placeholder="Tên danh mục *" required>
           </div>
           <div class="col-md-6">
-            <input id="categoryName" class="form-control mb-3" placeholder="Tên danh mục">
+            <input id="categoryDesc" class="form-control mb-3" placeholder="Mô tả (tùy chọn)">
           </div>
         </div>
         <button class="btn btn-custom" onclick="addCategory()">
@@ -99,15 +100,45 @@
               <tr>
                 <th><i class="fa-solid fa-hashtag me-2"></i>ID</th>
                 <th><i class="fa-solid fa-tag me-2"></i>Tên danh mục</th>
+                <th><i class="fa-solid fa-align-left me-2"></i>Mô tả</th>
+                <th><i class="fa-solid fa-cogs me-2"></i>Thao tác</th>
               </tr>
             </thead>
             <tbody id="categoryTable"></tbody>
           </table>
         </div>
       </div>
+
+      <!-- Modal sửa danh mục -->
+      <div class="modal fade" id="editCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Sửa danh mục</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="editCategoryId">
+              <div class="mb-3">
+                <label class="form-label">Tên danh mục</label>
+                <input type="text" id="editCategoryName" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <input type="text" id="editCategoryDesc" class="form-control">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+              <button type="button" class="btn btn-primary" onclick="saveEditCategory()">Lưu</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script src="js/api.js"></script>
   <script src="js/categories.js"></script>
 </body>
 </html>

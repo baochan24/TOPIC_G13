@@ -1,26 +1,47 @@
-from flask import request, jsonify, session
 from functools import wraps
+from flask import request, jsonify
+import jwt
+from datetime import datetime, timedelta
 
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({"message": "Login required"}), 401
-        return f(*args, **kwargs)
-    return decorated
+SECRET = "SECRET_KEY_ELECTRONIC_STORE"
 
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'role' not in session or session['role'] != 'admin':
-            return jsonify({"message": "Admin access required"}), 403
-        return f(*args, **kwargs)
-    return decorated
+def generate_token(user_id, role):
+    payload = {
+        "sub": user_id,
+        "role": role,
+        "exp": datetime.utcnow() + timedelta(hours=8)
+    }
+    return jwt.encode(payload, SECRET, algorithm="HS256")
 
-def employee_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'role' not in session or session['role'] not in ['admin', 'employee']:
-            return jsonify({"message": "Access denied"}), 403
-        return f(*args, **kwargs)
-    return decorated
+
+def token_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return jsonify({"message": "Missing token"}), 401
+
+        token = auth.split(" ", 1)[1]
+
+        try:
+            payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token expired"}), 401
+        except Exception:
+            return jsonify({"message": "Invalid token"}), 401
+
+        request.user = payload
+        return fn(*args, **kwargs)
+    return wrapper
+
+require_auth = token_required
+
+def require_role(*roles):
+    def deco(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if request.user.get("role") not in roles:
+                return jsonify({"message": "Forbidden"}), 403
+            return fn(*args, **kwargs)
+        return wrapper
+    return deco

@@ -1,3 +1,7 @@
+if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; }
+var API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
+
+
 // Load danh sách sản phẩm khi trang load
 document.addEventListener('DOMContentLoaded', loadProducts);
 
@@ -7,7 +11,14 @@ const statsChannel = new BroadcastChannel('stats-update');
 // Form thêm sản phẩm
 document.getElementById('productForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  addProduct();
+  const productId = document.getElementById('productId').value.trim();
+  if (productId) {
+    // Nếu có productId, là update
+    updateProduct(productId);
+  } else {
+    // Ngược lại là add
+    addProduct();
+  }
 });
 
 // Form import IMEI
@@ -20,7 +31,9 @@ document.getElementById('imeiForm').addEventListener('submit', function(e) {
 async function loadProducts() {
   console.log('Loading products...');
   try {
-    const response = await fetch('http://localhost:5000/products/');
+    const response = await fetch(API_BASE + '/products/', {
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
+    });
     console.log('Fetch response:', response);
     const products = await response.json();
     console.log('Products data:', products);
@@ -60,9 +73,9 @@ async function addProduct() {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/products/', {
+    const response = await fetch(API_BASE + '/products/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') },
       body: JSON.stringify(data)
     });
     const result = await response.json();
@@ -88,9 +101,9 @@ async function importImei() {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/inventory/import', {
+    const response = await fetch(API_BASE + '/inventory/import', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') },
       body: JSON.stringify(data)
     });
     const result = await response.json();
@@ -115,7 +128,11 @@ async function checkImei() {
   }
 
   try {
-    const response = await fetch(`/inventory/imei/${imei}`);
+    const url = (API_BASE || '') + '/inventory/imei/' + encodeURIComponent(imei);
+    const opts = { headers: {} };
+    if (typeof getAuthHeaders === 'function') opts.headers = getAuthHeaders();
+    else if (typeof getToken === 'function' && getToken()) opts.headers = { 'Authorization': 'Bearer ' + getToken() };
+    const response = await fetch(url, opts);
     const result = await response.json();
     const resultDiv = document.getElementById('imeiResult');
     if (response.ok) {
@@ -138,11 +155,100 @@ async function checkImei() {
 
 // Placeholder cho edit và delete (cần backend)
 function editProduct(id) {
-  alert('Chức năng sửa chưa implement');
+  // Tìm sản phẩm trong danh sách đã load
+  const tbody = document.querySelector('#productsTable tbody');
+  const rows = tbody.querySelectorAll('tr');
+  let productData = null;
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells[0].textContent === id) {
+      productData = {
+        product_id: cells[0].textContent,
+        product_name: cells[1].textContent,
+        brand: cells[2].textContent,
+        category_id: cells[3].textContent,
+        base_price: parseFloat(cells[4].textContent),
+        warranty_period: parseInt(cells[5].textContent.replace(' tháng', ''))
+      };
+    }
+  });
+
+  if (productData) {
+    // Điền vào form
+    const productIdInput = document.getElementById('productId');
+    productIdInput.value = productData.product_id;
+    productIdInput.readOnly = true; // Không cho sửa mã sản phẩm
+    document.getElementById('productName').value = productData.product_name;
+    document.getElementById('brand').value = productData.brand;
+    document.getElementById('categoryId').value = productData.category_id;
+    document.getElementById('basePrice').value = productData.base_price;
+    document.getElementById('warrantyPeriod').value = productData.warranty_period;
+
+    // Thay đổi button submit thành Update
+    const submitBtn = document.querySelector('#productForm button[type="submit"]');
+    submitBtn.textContent = 'Cập nhật sản phẩm';
+
+    // Scroll to form
+    document.getElementById('productForm').scrollIntoView();
+  }
 }
 
 function deleteProduct(id) {
-  alert('Chức năng xóa chưa implement');
+  if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+    fetch(API_BASE + '/products/' + id, {
+      method: 'DELETE',
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.message) {
+        alert('Xóa thành công!');
+        loadProducts();
+        statsChannel.postMessage('update-stats');
+      } else {
+        alert('Lỗi: ' + result.error);
+      }
+    })
+    .catch(error => {
+      console.error('Lỗi xóa sản phẩm:', error);
+      alert('Lỗi kết nối');
+    });
+  }
+}
+
+// Thêm hàm update
+async function updateProduct(id) {
+  const data = {
+    product_name: document.getElementById('productName').value,
+    brand: document.getElementById('brand').value,
+    category_id: document.getElementById('categoryId').value,
+    base_price: parseFloat(document.getElementById('basePrice').value),
+    warranty_period: parseInt(document.getElementById('warrantyPeriod').value)
+  };
+
+  try {
+    const response = await fetch(API_BASE + '/products/' + id, {
+      method: 'PUT',
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') },
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    if (response.ok) {
+      alert('Cập nhật sản phẩm thành công!');
+      document.getElementById('productForm').reset();
+      document.getElementById('productId').readOnly = false; // Reset readonly
+      loadProducts();
+      statsChannel.postMessage('update-stats');
+
+      // Reset button
+      const submitBtn = document.querySelector('#productForm button[type="submit"]');
+      submitBtn.textContent = 'Thêm sản phẩm';
+    } else {
+      alert('Lỗi: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Lỗi cập nhật sản phẩm:', error);
+  }
 }
 
 // Load products on page load

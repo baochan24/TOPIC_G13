@@ -1,3 +1,10 @@
+const token = localStorage.getItem('token');
+if (!token) {
+  window.location.href = 'auth.html';
+}
+
+
+
 // Form scan IMEI
 document.getElementById('scanForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -59,7 +66,7 @@ async function loadResults() {
       const row = `
         <tr>
           <td>${item.imei_serial}</td>
-          <td>${item.system_status || 'N/A'}</td>
+          <td>${item.expected_status || 'N/A'}</td>
           <td>${item.actual_status}</td>
           <td>${item.is_matched ? 'Có' : 'Không'}</td>
         </tr>

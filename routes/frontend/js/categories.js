@@ -1,51 +1,92 @@
-const API = "http://localhost:5000/categories";
-
-// BroadcastChannel để đồng bộ dashboard
-const statsChannel = new BroadcastChannel('stats-update');
+const API = window.API_BASE ? (window.API_BASE + '/categories') : 'http://127.0.0.1:5000/categories';
+const statsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('stats-update') : { postMessage: function(){} };
 
 function loadCategories() {
-  console.log('Loading categories...');
   fetch(API)
-    .then(res => {
-      console.log('Fetch response:', res);
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-      console.log('Categories data:', data);
-      const table = document.getElementById("categoryTable");
-      table.innerHTML = "";
-      data.forEach(c => {
+      const table = document.getElementById('categoryTable');
+      table.innerHTML = '';
+      (data || []).forEach(c => {
         table.innerHTML += `
           <tr>
-            <td>${c.category_id}</td>
-            <td>${c.category_name}</td>
+            <td>${c.category_id || ''}</td>
+            <td>${(c.category_name || '').replace(/</g,'&lt;')}</td>
+            <td>${(c.description || '-').replace(/</g,'&lt;')}</td>
+            <td>
+              <button class="btn btn-sm btn-warning me-1" onclick="openEditCategory('${(c.category_id||'').replace(/'/g,"\\'")}','${(c.category_name||'').replace(/'/g,"\\'")}','${(c.description||'').replace(/'/g,"\\'")}')">Sửa</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteCategory('${(c.category_id||'').replace(/'/g,"\\'")}')">Xóa</button>
+            </td>
           </tr>
         `;
       });
     })
-    .catch(error => {
-      console.error('Error loading categories:', error);
-    });
+    .catch(() => { document.getElementById('categoryTable').innerHTML = '<tr><td colspan="4" class="text-center">Lỗi tải dữ liệu</td></tr>'; });
 }
 
 function addCategory() {
-  const id = document.getElementById("categoryId").value;
-  const name = document.getElementById("categoryName").value;
+  const name = document.getElementById('categoryName').value.trim();
+  const desc = document.getElementById('categoryDesc').value.trim();
+  if (!name) { alert('Vui lòng nhập tên danh mục'); return; }
 
   fetch(API, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      category_id: id,
-      category_name: name
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category_name: name, description: desc || null })
+  })
+    .then(res => res.json().then(r => ({ ok: res.ok, ...r })))
+    .then(r => {
+      if (r.ok || r.category_id) {
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryDesc').value = '';
+        loadCategories();
+        statsChannel.postMessage('update-stats');
+      } else alert('Lỗi: ' + (r.error || 'Thêm thất bại'));
     })
-  }).then(() => {
-    loadCategories();
-    statsChannel.postMessage('update-stats'); // Đồng bộ dashboard
-  });
+    .catch(() => alert('Lỗi kết nối'));
+}
+
+function openEditCategory(id, name, desc) {
+  document.getElementById('editCategoryId').value = id;
+  document.getElementById('editCategoryName').value = name || '';
+  document.getElementById('editCategoryDesc').value = desc || '';
+  new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+}
+
+function saveEditCategory() {
+  const id = document.getElementById('editCategoryId').value;
+  const name = document.getElementById('editCategoryName').value.trim();
+  const desc = document.getElementById('editCategoryDesc').value.trim();
+  if (!id || !name) { alert('Thiếu thông tin'); return; }
+
+  fetch(API + '/' + encodeURIComponent(id), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category_name: name, description: desc || null })
+  })
+    .then(res => res.json().then(r => ({ ok: res.ok, ...r })))
+    .then(r => {
+      if (r.ok || r.message === 'Category updated') {
+        bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
+        loadCategories();
+        statsChannel.postMessage('update-stats');
+      } else alert('Lỗi: ' + (r.error || 'Cập nhật thất bại'));
+    })
+    .catch(() => alert('Lỗi kết nối'));
+}
+
+function deleteCategory(id) {
+  if (!id || !confirm('Xóa danh mục này?')) return;
+  fetch(API + '/' + encodeURIComponent(id), { method: 'DELETE' })
+    .then(res => res.json().then(r => ({ ok: res.ok, ...r })))
+    .then(r => {
+      if (r.ok || r.message === 'Category deleted') {
+        loadCategories();
+        statsChannel.postMessage('update-stats');
+      } else alert('Lỗi: ' + (r.error || 'Xóa thất bại'));
+    })
+    .catch(() => alert('Lỗi kết nối'));
 }
 
 loadCategories();
-
-// Auto refresh every 10 seconds
-setInterval(loadCategories, 10000);
+if (typeof setInterval !== 'undefined') setInterval(loadCategories, 15000);

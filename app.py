@@ -1,38 +1,43 @@
-
-#login phân quyền
-#đừng quên import blueprint vào app.py
-#đừng sửa nha
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from routes.inventory import inventory_bp
-from routes.stock_check import stock_bp
 
-
-# import blueprint
-from routes.auth import auth_bp
+# ===== IMPORT BLUEPRINT =====
+from routes.auth import authLogin_bp 
+from routes.viewSystemLogs import view_logs_bp
 from routes.products import products_bp
-from routes.orders import orders_bp
-from routes.returns import returns_bp
+from routes.customers import customers_bp
 from routes.categories import categories_bp
-
+from routes.warranty import warranty_bp
+from routes.inventoryImei import inventory_bp
+from routes.stock_check import stock_bp
+from routes.reports import reports_bp
+from routes.returnsMoney import returnsMoney_bp
+from routes.createOders import create_order_bp
 
 app = Flask(__name__)
 CORS(app)
 
-# đăng ký blueprint
-app.register_blueprint(auth_bp)
+# ===== REGISTER BLUEPRINT =====
+app.register_blueprint(authLogin_bp)
 app.register_blueprint(products_bp)
-app.register_blueprint(orders_bp)
-app.register_blueprint(returns_bp)
+app.register_blueprint(returnsMoney_bp)
 app.register_blueprint(inventory_bp)
 app.register_blueprint(categories_bp)
 app.register_blueprint(stock_bp)
-if __name__ == "__main__":
-    app.run(debug=True)
+app.register_blueprint(warranty_bp)
+app.register_blueprint(reports_bp)
+app.register_blueprint(customers_bp)
+app.register_blueprint(create_order_bp)
+app.register_blueprint(view_logs_bp)
 
+# ===== FRONTEND ROUTES =====
 @app.route('/')
 def index():
     return send_from_directory('routes/frontend', 'index.html')
+
+@app.route('/auth')
+def auth_page():
+    return send_from_directory('routes/frontend', 'auth.html')
 
 @app.route('/categories')
 def categories():
@@ -46,10 +51,35 @@ def products():
 def stock_check():
     return send_from_directory('routes/frontend', 'stock_Check.html')
 
+@app.route('/customers')
+def customers_page():
+    return send_from_directory('routes/frontend', 'customers.html')
+
+@app.route('/orders')
+def orders_page():
+    return send_from_directory('routes/frontend', 'createOders.html')
+
+@app.route('/reports')
+def reports_page():
+    return send_from_directory('routes/frontend', 'reports.html')
+
+@app.route('/warranty')
+def warranty_page():
+    return send_from_directory('routes/frontend', 'warranty.html')
+
+@app.route('/system-logs')
+def system_logs_page():
+    return send_from_directory('routes/frontend', 'viewSystemLogs.html')
+
+# ===== STATIC FILES =====
 @app.route('/<path:filename>')
 def static_files(filename):
     if filename.startswith('js/'):
         return send_from_directory('routes/frontend/js', filename[3:])
-    elif filename.startswith('style/'):
+    if filename.startswith('style/'):
         return send_from_directory('routes/frontend/style', filename[6:])
     return send_from_directory('routes/frontend', filename)
+
+# ===== RUN SERVER (LUÔN ĐỂ CUỐI) =====
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=5000)

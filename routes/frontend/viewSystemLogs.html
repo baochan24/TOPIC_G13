@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhật ký hệ thống | EMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="./style/style.css?v=2">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .page-container { max-width: 1100px; margin: 20px auto; }
+    .card { border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.08); margin-bottom: 1rem; }
+    .back-btn { position: fixed; top: 16px; left: 16px; z-index: 1000; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="btn btn-secondary back-btn"><i class="fa-solid fa-arrow-left me-2"></i>Trang chủ</a>
+
+  <div class="container page-container">
+    <div class="card">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fa-solid fa-clipboard-list me-2"></i>Nhật ký hệ thống (Admin)</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-2 mb-3">
+          <div class="col-md-2"><input type="text" id="qUserId" class="form-control" placeholder="User ID"></div>
+          <div class="col-md-2"><input type="text" id="qKeyword" class="form-control" placeholder="Từ khóa (action)"></div>
+          <div class="col-md-2"><input type="date" id="qDateFrom" class="form-control" placeholder="Từ ngày"></div>
+          <div class="col-md-2"><input type="date" id="qDateTo" class="form-control" placeholder="Đến ngày"></div>
+          <div class="col-md-2"><button class="btn btn-dark w-100" onclick="loadLogs()"><i class="fa-solid fa-search me-1"></i>Tìm</button></div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover" id="logsTable">
+            <thead class="table-dark"><tr><th>Log ID</th><th>User</th><th>Hành động</th><th>IP</th><th>Thời gian</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted" id="logsPagination">-</small>
+          <div>
+            <button class="btn btn-sm btn-outline-secondary me-1" id="logsPrev" onclick="logsPage(-1)">Trước</button>
+            <span id="logsPageNum">1</span>
+            <button class="btn btn-sm btn-outline-secondary ms-1" id="logsNext" onclick="logsPage(1)">Sau</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Thống kê theo ngày</div>
+      <div class="card-body">
+        <button class="btn btn-outline-secondary btn-sm" onclick="loadLogStats()">Tải thống kê</button>
+        <div class="table-responsive mt-2">
+          <table class="table table-sm" id="statsTable">
+            <thead><tr><th>Ngày</th><th>Số bản ghi</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/viewSystemLogs.js"></script>
+</body>
+</html>

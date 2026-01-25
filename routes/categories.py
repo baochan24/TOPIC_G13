@@ -1,3 +1,4 @@
+#quan ly danh muc san pham
 from flask import Blueprint, request, jsonify
 from db import get_db_connection
 import uuid

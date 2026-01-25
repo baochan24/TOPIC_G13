@@ -18,6 +18,13 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./style/style.css?v=2">
+  <script src="./js/api.js"></script>
+  <script>
+    // Check auth on load
+    if (typeof getToken === 'function' && !getToken()) {
+      window.location.href = 'auth.html';
+    }
+  </script>
 </head>
 
 <body>
@@ -39,7 +46,7 @@
   <aside class="sidebar bg-gradient-dark text-white p-4">
     <!-- LOGO & BRAND -->
     <div class="text-center mb-4">
-      <i class="fa-solid fa-warehouse fa-3x text-white mb-2"></i>
+      <i class="fa-solid fa-warehouse fa-3x text-white mb-2"></i>   
       <h5 class="fw-bold mb-0">EMS</h5>
       <small class="text-white">Electronic Management System</small>
     </div>
@@ -60,33 +67,87 @@
     <!-- NAVIGATION -->
     <ul class="nav flex-column gap-2">
       <li class="nav-item">
-        <a class="nav-link text-white active d-flex align-items-center" href="#">
+        <a class="nav-link text-white active d-flex align-items-center" href="index.html">
           <i class="fa-solid fa-tachometer-alt me-3"></i>
           <span>Bảng điều khiển</span>
         </a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link text-white d-flex align-items-center" href="categories.html">
           <i class="fa-solid fa-layer-group me-3"></i>
           <span>Danh mục</span>
-          <span class="badge bg-primary ms-auto">3</span>
         </a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link text-white d-flex align-items-center" href="products.html">
           <i class="fa-solid fa-box me-3"></i>
           <span>Sản phẩm</span>
-          <span class="badge bg-success ms-auto">12</span>
         </a>
       </li>
-
       <li class="nav-item">
-        <a class="nav-link text-white d-flex align-items-center" href="stock_check.html">
+        <a class="nav-link text-white d-flex align-items-center" href="inventoryImei.html">
+          <i class="fa-solid fa-warehouse me-3"></i>
+          <span>Nhập kho IMEI</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="stock_Check.html">
           <i class="fa-solid fa-barcode me-3"></i>
           <span>Kiểm kê IMEI</span>
-          <span class="badge bg-warning ms-auto">!</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="customers.html">
+          <i class="fa-solid fa-users me-3"></i>
+          <span>Khách hàng</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="employer_management.html">
+          <i class="fa-solid fa-user-cog me-3"></i>
+          <span>Quản lý nhân viên</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="createOders.html">
+          <i class="fa-solid fa-cart-plus me-3"></i>
+          <span>Tạo đơn hàng</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="reports.html">
+          <i class="fa-solid fa-chart-line me-3"></i>
+          <span>Báo cáo</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="returnsMoney.html">
+          <i class="fa-solid fa-undo me-3"></i>
+          <span>Trả hàng</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="warranty.html">
+          <i class="fa-solid fa-wrench me-3"></i>
+          <span>Bảo hành</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="product_lifecycle.html">
+          <i class="fa-solid fa-history me-3"></i>
+          <span>Vòng đời sản phẩm</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="viewSystemLogs.html">
+          <i class="fa-solid fa-clipboard-list me-3"></i>
+          <span>Nhật ký hệ thống</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white d-flex align-items-center" href="auth.html" id="navAuth">
+          <i class="fa-solid fa-right-to-bracket me-3"></i>
+          <span>Đăng nhập</span>
         </a>
       </li>
     </ul>
@@ -165,8 +226,8 @@
           <div class="card dashboard-card h-100 text-center">
             <div class="card-body">
               <i class="fa-solid fa-barcode fa-2x text-warning mb-3"></i>
-              <h6>IMEI</h6>
-              <a href="stock_check.html" class="btn btn-outline-warning btn-sm w-100">Kiểm kê</a>
+              <h6>Kiểm kê IMEI</h6>
+              <a href="stock_Check.html" class="btn btn-outline-warning btn-sm w-100">Kiểm kê</a>
             </div>
           </div>
         </div>
@@ -175,7 +236,7 @@
             <div class="card-body">
               <i class="fa-solid fa-chart-line fa-2x text-info mb-3"></i>
               <h6>Báo cáo</h6>
-              <button class="btn btn-outline-info btn-sm w-100" onclick="loadStatistics()">Làm mới</button>
+              <a href="reports.html" class="btn btn-outline-info btn-sm w-100">Mở báo cáo</a>
             </div>
           </div>
         </div>
@@ -280,86 +341,73 @@
   </main>
 </div>
 
+<script src="js/api.js"></script>
 <script>
-// Load statistics khi trang load
-document.addEventListener('DOMContentLoaded', loadStatistics);
+var _apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : 'http://localhost:5000';
 
-// Auto refresh every 10 seconds
-setInterval(loadStatistics, 10000);
-
-// BroadcastChannel để đồng bộ
-const statsChannel = new BroadcastChannel('stats-update');
-statsChannel.onmessage = function(e) {
-  if (e.data === 'update-stats') {
-    loadStatistics();
+document.addEventListener('DOMContentLoaded', function() {
+  loadStatistics();
+  var a = document.getElementById('navAuth');
+  if (a && typeof getToken === 'function' && getToken()) {
+    a.innerHTML = '<i class="fa-solid fa-right-from-bracket me-3"></i><span>Đăng xuất</span>';
+    a.href = '#';
+    a.onclick = function(e) { e.preventDefault(); if (typeof clearAuth === 'function') clearAuth(); location.href = 'index.html'; return false; };
   }
-};
+});
+
+setInterval(loadStatistics, 10000);
+var statsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('stats-update') : { onmessage: function(){} };
+statsChannel.onmessage = function(e) { if (e.data === 'update-stats') loadStatistics(); };
 
 async function loadStatistics() {
-  console.log('Loading statistics...');
-  // Show loading
-  document.getElementById('catCount').innerHTML = '<span class="loading"></span>';
-  document.getElementById('prodCount').innerHTML = '<span class="loading"></span>';
-  document.getElementById('imeiCount').innerHTML = '<span class="loading"></span>';
-  document.getElementById('defectCount').innerHTML = '<span class="loading"></span>';
-  document.querySelector('#inventoryTable tbody').innerHTML = '<tr><td colspan="5" class="text-center"><span class="loading"></span> Đang tải dữ liệu...</td></tr>';
+  var catEl = document.getElementById('catCount'), prodEl = document.getElementById('prodCount');
+  var imeiEl = document.getElementById('imeiCount'), defectEl = document.getElementById('defectCount');
+  var tbody = document.querySelector('#inventoryTable tbody');
+  if (catEl) catEl.innerHTML = '<span class="loading"></span>';
+  if (prodEl) prodEl.innerHTML = '<span class="loading"></span>';
+  if (imeiEl) imeiEl.innerHTML = '<span class="loading"></span>';
+  if (defectEl) defectEl.innerHTML = '<span class="loading"></span>';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center"><span class="loading"></span> Đang tải...</td></tr>';
+
+  var hd = (typeof getAuthHeaders === 'function' ? getAuthHeaders() : {});
+  if (document.getElementById('currentDate')) document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
 
   try {
-    // Set current date
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
+    var catRes = await fetch(_apiBase + '/categories');
+    var categories = await catRes.json();
+    if (catEl) catEl.textContent = (categories && categories.length) ? categories.length : 0;
 
-    // Danh mục
-    console.log('Fetching categories...');
-    const catResponse = await fetch('http://localhost:5000/categories/');
-    console.log('Categories response:', catResponse);
-    const categories = await catResponse.json();
-    console.log('Categories data:', categories);
-    document.getElementById('catCount').textContent = categories.length;
+    var prodRes = await fetch(_apiBase + '/products/');
+    var products = await prodRes.json();
+    if (prodEl) prodEl.textContent = (products && products.length) ? products.length : 0;
 
-    // Sản phẩm
-    console.log('Fetching products...');
-    const prodResponse = await fetch('http://localhost:5000/products/');
-    console.log('Products response:', prodResponse);
-    const products = await prodResponse.json();
-    console.log('Products data:', products);
-    document.getElementById('prodCount').textContent = products.length;
-
-    // Inventory report
-    console.log('Fetching inventory...');
-    const invResponse = await fetch('http://localhost:5000/inventory/');
-    console.log('Inventory response:', invResponse);
-    const inventory = await invResponse.json();
-    console.log('Inventory data:', inventory);
-    const totalInStock = inventory.reduce((sum, item) => sum + item.in_stock, 0);
-    document.getElementById('imeiCount').textContent = totalInStock;
-    document.getElementById('totalItems').textContent = totalInStock;
-
-    // Thiết bị lỗi (tạm 0)
-    document.getElementById('defectCount').textContent = '0';
-
-    // Populate bảng tồn kho
-    const tbody = document.querySelector('#inventoryTable tbody');
-    tbody.innerHTML = '';
-    inventory.forEach(item => {
-      const row = `
-        <tr>
-          <td>${item.product_id}</td>
-          <td>${item.total}</td>
-          <td>${item.in_stock}</td>
-          <td>${item.total - item.in_stock}</td>
-          <td>0</td> <!-- Placeholder cho lỗi -->
-        </tr>
-      `;
-      tbody.innerHTML += row;
-    });
-
-  } catch (error) {
-    console.error('Lỗi load statistics:', error);
-    // Hide loading on error
-    ['catCount', 'prodCount', 'imeiCount', 'defectCount'].forEach(id => {
-      document.getElementById(id).textContent = 'Error';
-    });
-    document.querySelector('#inventoryTable tbody').innerHTML = '<tr><td colspan="5" class="text-center">Lỗi tải dữ liệu</td></tr>';
+    var invOpts = {};
+    if (typeof getAuthHeaders === 'function') invOpts.headers = getAuthHeaders();
+    var invRes = await fetch(_apiBase + '/inventory/', invOpts);
+    if (invRes.status === 401) {
+      if (imeiEl) imeiEl.textContent = '-';
+      if (document.getElementById('totalItems')) document.getElementById('totalItems').textContent = '-';
+      if (defectEl) defectEl.textContent = '-';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Đăng nhập để xem tồn kho</td></tr>';
+    } else {
+      var inventory = await invRes.json();
+      var totalInStock = (inventory || []).reduce(function(s, i) { return s + (i.in_stock || 0); }, 0);
+      if (imeiEl) imeiEl.textContent = totalInStock;
+      if (document.getElementById('totalItems')) document.getElementById('totalItems').textContent = totalInStock;
+      if (defectEl) defectEl.textContent = '0';
+      if (tbody) {
+        tbody.innerHTML = '';
+        (inventory || []).forEach(function(item) {
+          tbody.innerHTML += '<tr><td>' + (item.product_id || '') + '</td><td>' + (item.total || 0) + '</td><td>' + (item.in_stock || 0) + '</td><td>' + ((item.total || 0) - (item.in_stock || 0)) + '</td><td>0</td></tr>';
+        });
+      }
+    }
+  } catch (err) {
+    if (catEl) catEl.textContent = '-';
+    if (prodEl) prodEl.textContent = '-';
+    if (imeiEl) imeiEl.textContent = '-';
+    if (defectEl) defectEl.textContent = '-';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center">Lỗi tải dữ liệu</td></tr>';
   }
 }
 </script>
