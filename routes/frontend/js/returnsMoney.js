@@ -1,7 +1,7 @@
-if (typeof requireAuth === 'function' && !requireAuth('auth.html')) { /* redirect */ }
+if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect */ }
 var API_BASE = window.API_BASE || 'http://localhost:5000';
 
-function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : ''); }; }
+function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : '') }; }
 
 function loadReturnRequests() {
   fetch(API_BASE + '/returns', { headers: hd() })
@@ -61,4 +61,13 @@ function requestReturn() {
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; return; }
   loadReturnRequests();
+
+  var loadBtn = document.getElementById('loadReturnRequestsBtn');
+  if (loadBtn) loadBtn.addEventListener('click', loadReturnRequests);
+
+  var processBtn = document.getElementById('doProcessReturnBtn');
+  if (processBtn) processBtn.addEventListener('click', doProcessReturn);
+
+  var requestBtn = document.getElementById('requestReturnBtn');
+  if (requestBtn) requestBtn.addEventListener('click', requestReturn);
 });

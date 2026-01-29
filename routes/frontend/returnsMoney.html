@@ -23,7 +23,7 @@
     <div class="card">
       <div class="card-header bg-warning text-dark"><i class="fa-solid fa-list me-2"></i>Danh sách yêu cầu trả hàng (Admin)</div>
       <div class="card-body">
-        <button class="btn btn-outline-primary mb-2" onclick="loadReturnRequests()">Tải danh sách</button>
+        <button id="loadReturnRequestsBtn" class="btn btn-outline-primary mb-2">Tải danh sách</button>
         <div class="table-responsive">
           <table class="table table-sm table-hover" id="returnsTable">
             <thead class="table-dark"><tr><th>Mã trả</th><th>Order item</th><th>Lý do</th><th>Hoàn tiền</th><th>Ngày trả</th><th>Thao tác</th></tr></thead>
@@ -53,7 +53,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-            <button type="button" class="btn btn-primary" onclick="doProcessReturn()">Xử lý</button>
+            <button type="button" id="doProcessReturnBtn" class="btn btn-primary">Xử lý</button>
           </div>
         </div>
       </div>
@@ -71,12 +71,13 @@
           <label class="form-label">Lý do</label>
           <input type="text" id="reqReason" class="form-control" placeholder="Lý do trả hàng">
         </div>
-        <button class="btn btn-info" onclick="requestReturn()">Gửi yêu cầu</button>
+        <button id="requestReturnBtn" class="btn btn-info">Gửi yêu cầu</button>
       </div>
     </div>
   </div>
 
   <script src="./js/api.js"></script>
-  <script src="./js/returnsMoney.js"></script>
+  <script src="./js/api.js?v=1"></script>
+  <script src="./js/returnsMoney.js?v=1"></script>
 </body>
 </html>

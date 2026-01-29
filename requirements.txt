@@ -3,3 +3,24 @@ flask-cors==4.0.0
 mysql-connector-python==8.0.33
 bcrypt==4.0.1
 PyJWT==2.8.0
+Postman==10.16.24
+cusorm==0.1.1
+chatgpt==0.0.3
+# Hướng dẫn cài đặt và chạy ứng dụng
+# EMS – Electronic Management System
+
+## 1. Cài đặt
+pip install -r requirements.txt
+
+## 2. Tạo database
+mysql -u root -p < database.sql
+
+## 3. Seed dữ liệu mẫu
+python seed_sample_data.py
+
+## 4. Chạy server
+python app.py
+
+## 5. Login
+Username: admin
+Password: 123456

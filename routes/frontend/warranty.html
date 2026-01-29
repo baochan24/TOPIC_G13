@@ -28,7 +28,7 @@
           <div class="col-md-3"><input type="text" id="recImei" class="form-control" placeholder="IMEI *"></div>
           <div class="col-md-2"><input type="text" id="recStaffId" class="form-control" placeholder="Staff ID *"></div>
           <div class="col-md-2"><input type="text" id="recNote" class="form-control" placeholder="Ghi chú lỗi"></div>
-          <div class="col-md-2"><button class="btn btn-primary w-100" onclick="receiveWarranty()">Tiếp nhận</button></div>
+          <div class="col-md-2"><button id="receiveWarrantyBtn" class="btn btn-primary w-100">Tiếp nhận</button></div>
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@
           <div class="col-md-2"><input type="text" id="updStaffId" class="form-control" placeholder="Staff ID *"></div>
           <div class="col-md-3"><input type="text" id="updNote" class="form-control" placeholder="Ghi chú tiến độ"></div>
           <div class="col-md-2"><label class="form-check"><input type="checkbox" id="updCompleted" class="form-check-input"> Hoàn thành</label></div>
-          <div class="col-md-2"><button class="btn btn-warning w-100" onclick="updateProgress()">Cập nhật</button></div>
+          <div class="col-md-2"><button id="updateProgressBtn" class="btn btn-warning w-100">Cập nhật</button></div>
         </div>
       </div>
     </div>
@@ -55,13 +55,14 @@
           <div class="col-md-3"><input type="text" id="retWarrantyId" class="form-control" placeholder="Mã phiếu BH *"></div>
           <div class="col-md-2"><input type="text" id="retStaffId" class="form-control" placeholder="Staff ID *"></div>
           <div class="col-md-2"><input type="number" id="retFee" class="form-control" placeholder="Phí DV (0)" value="0"></div>
-          <div class="col-md-2"><button class="btn btn-success w-100" onclick="returnDevice()">Trả máy</button></div>
+          <div class="col-md-2"><button id="returnDeviceBtn" class="btn btn-success w-100">Trả máy</button></div>
         </div>
       </div>
     </div>
   </div>
 
   <script src="./js/api.js"></script>
-  <script src="./js/warranty.js"></script>
+  <script src="./js/api.js?v=1"></script>
+  <script src="./js/warranty.js?v=1"></script>
 </body>
 </html>

@@ -22,3 +22,4 @@ def db_cursor():
     finally:
         cur.close()
         conn.close()
+print("Database connection established")

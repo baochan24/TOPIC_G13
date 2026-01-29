@@ -95,7 +95,7 @@ def create_customer():
     address = data.get("address")
 
     if not phone:
-        return jsonify({"message": "Số điện thoại là bắt buộc"}), 400
+        return jsonify({"success": False, "message": "Số điện thoại là bắt buộc"}), 400
 
     with db_cursor() as (_, cur):
         ip = request.remote_addr
@@ -105,8 +105,9 @@ def create_customer():
         existed = cur.fetchone()
         if existed:
             return jsonify({
+                "success": False,
                 "message": "Khách hàng đã tồn tại",
-                "customer": existed
+                "data": existed
             }), 409
 
         customer_id = gen_id("C")
@@ -122,8 +123,9 @@ def create_customer():
         log(cur, request.user["sub"], f"CREATE_CUSTOMER {customer_id}", ip)
 
     return jsonify({
+        "success": True,
         "message": "Thêm khách hàng thành công",
-        "customer_id": customer_id
+        "data": {"customer_id": customer_id}
     }), 201
 
 # ==========================

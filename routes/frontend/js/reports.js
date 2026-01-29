@@ -1,4 +1,4 @@
-if (typeof requireAuth === 'function' && !requireAuth('auth.html')) { /* redirect */ }
+if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect */ }
 var API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
 
 function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : '') }; }
@@ -49,4 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var today = new Date().toISOString().slice(0,10);
   var sd = document.getElementById('startDate'); if (sd && !sd.value) sd.value = today;
   var ed = document.getElementById('endDate'); if (ed && !ed.value) ed.value = today;
+
+  // Add event listener for generate report button
+  var btn = document.getElementById('generateReportBtn');
+  if (btn) btn.addEventListener('click', generateReport);
 });

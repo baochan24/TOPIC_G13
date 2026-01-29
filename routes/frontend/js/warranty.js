@@ -1,4 +1,4 @@
-if (typeof requireAuth === 'function' && !requireAuth('auth.html')) { /* redirect - warranty backend không bắt auth nhưng vẫn dùng staff_id */ }
+if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect - warranty backend không bắt auth nhưng vẫn dùng staff_id */ }
 var API_BASE = window.API_BASE || 'http://localhost:5000';
 
 function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json' }; }
@@ -42,4 +42,13 @@ function returnDevice() {
     .catch(function() { alert('Lỗi kết nối'); });
 }
 
-document.addEventListener('DOMContentLoaded', function() {});
+document.addEventListener('DOMContentLoaded', function() {
+  var btn1 = document.getElementById('receiveWarrantyBtn');
+  if (btn1) btn1.addEventListener('click', receiveWarranty);
+
+  var btn2 = document.getElementById('updateProgressBtn');
+  if (btn2) btn2.addEventListener('click', updateProgress);
+
+  var btn3 = document.getElementById('returnDeviceBtn');
+  if (btn3) btn3.addEventListener('click', returnDevice);
+});

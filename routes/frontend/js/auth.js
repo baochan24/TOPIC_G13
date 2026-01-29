@@ -1,3 +1,54 @@
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = getToken();
+  if (!token) return;
+
+  const res = await fetch(API_BASE + "/auth/verify", {
+    headers: getAuthHeaders()
+  });
+
+  if (res.ok) {
+    window.location.href = "index.html";
+  }
+});
+
+document.getElementById("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const username = usernameInput.value;
+  const password = passwordInput.value;
+
+  const res = await fetch(API_BASE + "/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return alert(data.message);
+
+  setToken(data.token);
+  setRole(data.role);
+  window.location.href = "index.html";
+});
+
+
+document.addEventListener('DOMContentLoaded', async function () {
+  const token = getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/verify`, {
+      headers: getAuthHeaders()
+    });
+
+    if (res.ok) {
+      window.location.href = '/index.html';
+    }
+  } catch (_) {
+    console.log('Token invalid');
+  }
+});
+
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
@@ -7,16 +58,12 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
   errorBox.classList.add('d-none');
 
-  console.log('API_BASE:', window.API_BASE);
-
   try {
-    const res = await fetch(`${window.API_BASE}/auth/login`, {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
-
-    console.log('Response status:', res.status);
 
     const data = await res.json();
 
@@ -28,11 +75,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
     setToken(data.token);
     setRole(data.role);
-
-    window.location.href = 'index.html';
+    window.location.href = '/index.html';
 
   } catch (err) {
-    console.error(err);
     errorBox.textContent = 'Không thể kết nối server';
     errorBox.classList.remove('d-none');
   }

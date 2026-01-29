@@ -31,7 +31,7 @@ async function scanImei() {
   };
 
   try {
-    const response = await fetch(`http://localhost:5000/stock/${checkId}/scan`, {
+    const response = await fetch(`/stock/${checkId}/scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -58,7 +58,7 @@ async function loadResults() {
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/stock/${checkId}/result`);
+    const response = await fetch(`/stock/${checkId}/result`);
     const results = await response.json();
     const tbody = document.querySelector('#resultsTable tbody');
     tbody.innerHTML = '';
@@ -87,7 +87,7 @@ async function adjustStock() {
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/stock/${checkId}/adjust`, {
+    const response = await fetch(`/stock/${checkId}/adjust`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -104,3 +104,11 @@ async function adjustStock() {
     document.getElementById('adjustResult').innerHTML = '<div class="alert alert-danger">Lỗi kết nối</div>';
   }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var loadBtn = document.getElementById('loadResultsBtn');
+  if (loadBtn) loadBtn.addEventListener('click', loadResults);
+
+  var adjustBtn = document.getElementById('adjustStockBtn');
+  if (adjustBtn) adjustBtn.addEventListener('click', adjustStock);
+});

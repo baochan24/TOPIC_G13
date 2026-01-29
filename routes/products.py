@@ -1,5 +1,4 @@
-
-#Quan ly san pham
+# Quan ly san pham
 from flask import Blueprint, jsonify, request
 from db import get_db_connection
 from utils.auth_middleware import require_auth, require_role
@@ -7,8 +6,9 @@ from utils.auth_middleware import require_auth, require_role
 products_bp = Blueprint("products", __name__, url_prefix="/products")
 
 
+# ===============================
 # GET: lấy danh sách sản phẩm
-
+# ===============================
 @products_bp.route("/", methods=["GET"])
 @require_auth
 @require_role("admin", "staff")
@@ -22,12 +22,15 @@ def get_products():
     cursor.close()
     conn.close()
 
-    return jsonify(products), 200
+    # 🔧 FIX 304 CACHE
+    response = jsonify(products)
+    response.headers["Cache-Control"] = "no-store"
+    return response, 200
 
 
-
-#tạo sản phẩm mới
-
+# ===============================
+# CREATE sản phẩm
+# ===============================
 @products_bp.route("/", methods=["POST"])
 @require_auth
 @require_role("admin", "staff")
@@ -67,8 +70,14 @@ def create_product():
             data["warranty_period"]
         ))
         conn.commit()
+
     except Exception as e:
+        conn.rollback()
+        # 🔧 FIX TRÙNG PRODUCT_ID
+        if "Duplicate entry" in str(e):
+            return jsonify({"error": "Product ID already exists"}), 400
         return jsonify({"error": str(e)}), 500
+
     finally:
         cursor.close()
         conn.close()
@@ -76,7 +85,9 @@ def create_product():
     return jsonify({"message": "Product created"}), 201
 
 
+# ===============================
 # UPDATE sản phẩm
+# ===============================
 @products_bp.route("/<product_id>", methods=["PUT"])
 @require_auth
 @require_role("admin", "staff")
@@ -90,14 +101,16 @@ def update_product(product_id):
     cursor = conn.cursor()
 
     try:
-        # Check if product exists
-        cursor.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+        cursor.execute(
+            "SELECT product_id FROM products WHERE product_id = %s",
+            (product_id,)
+        )
         if not cursor.fetchone():
             return jsonify({"error": "Product not found"}), 404
 
-        # Update fields
         update_fields = []
         values = []
+
         for field in ["product_name", "brand", "category_id", "base_price", "warranty_period"]:
             if field in data:
                 update_fields.append(f"{field} = %s")
@@ -116,12 +129,15 @@ def update_product(product_id):
     except Exception as e:
         conn.rollback()
         return jsonify({"error": str(e)}), 500
+
     finally:
         cursor.close()
         conn.close()
 
 
+# ===============================
 # DELETE sản phẩm
+# ===============================
 @products_bp.route("/<product_id>", methods=["DELETE"])
 @require_auth
 @require_role("admin", "staff")
@@ -130,19 +146,30 @@ def delete_product(product_id):
     cursor = conn.cursor()
 
     try:
-        # Check if product exists
-        cursor.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+        cursor.execute(
+            "SELECT product_id FROM products WHERE product_id = %s",
+            (product_id,)
+        )
         if not cursor.fetchone():
             return jsonify({"error": "Product not found"}), 404
 
-        cursor.execute("DELETE FROM products WHERE product_id = %s", (product_id,))
+        cursor.execute(
+            "DELETE FROM products WHERE product_id = %s",
+            (product_id,)
+        )
         conn.commit()
 
         return jsonify({"message": "Product deleted"}), 200
 
     except Exception as e:
         conn.rollback()
+        # 🔧 FIX LỖI FK (IMEI / INVENTORY)
+        if "foreign key" in str(e).lower():
+            return jsonify({
+                "error": "Không thể xóa sản phẩm vì đã có IMEI hoặc tồn kho"
+            }), 400
         return jsonify({"error": str(e)}), 500
+
     finally:
         cursor.close()
         conn.close()

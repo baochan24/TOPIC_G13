@@ -1,9 +1,13 @@
 if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; }
-var API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
+var API_BASE = '';
 const statsChannel = new BroadcastChannel('stats-update');
 
 // Load danh sách nhân viên khi trang load
-document.addEventListener('DOMContentLoaded', loadStaff);
+document.addEventListener('DOMContentLoaded', function() {
+  loadStaff();
+  var updateBtn = document.getElementById('updateStaffBtn');
+  if (updateBtn) updateBtn.addEventListener('click', updateStaff);
+});
 
 // Form thêm nhân viên
 document.getElementById('addStaffForm').addEventListener('submit', function(e) {
@@ -14,7 +18,7 @@ document.getElementById('addStaffForm').addEventListener('submit', function(e) {
 // Load danh sách nhân viên
 async function loadStaff() {
   try {
-    const response = await fetch(API_BASE + '/admin/staff', {
+    const response = await fetch('/admin/staff', {
       headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
     });
     const staff = await response.json();
@@ -70,7 +74,7 @@ async function addStaff() {
   }
 
   try {
-    const response = await fetch(API_BASE + '/admin/staff', {
+    const response = await fetch('/admin/staff', {
       method: 'POST',
       headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') },
       body: JSON.stringify(data)
@@ -118,7 +122,7 @@ async function updateStaff() {
   }
 
   try {
-    const response = await fetch(API_BASE + '/admin/staff/' + userId, {
+    const response = await fetch('/admin/staff/' + userId, {
       method: 'PUT',
       headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') },
       body: JSON.stringify(data)
@@ -143,7 +147,7 @@ async function deleteStaff(userId) {
   if (!confirm('Bạn có chắc muốn xóa nhân viên này?')) return;
 
   try {
-    const response = await fetch(API_BASE + '/admin/staff/' + userId, {
+    const response = await fetch('/admin/staff/' + userId, {
       method: 'DELETE',
       headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
     });

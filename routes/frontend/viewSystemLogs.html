@@ -27,7 +27,7 @@
           <div class="col-md-2"><input type="text" id="qKeyword" class="form-control" placeholder="Từ khóa (action)"></div>
           <div class="col-md-2"><input type="date" id="qDateFrom" class="form-control" placeholder="Từ ngày"></div>
           <div class="col-md-2"><input type="date" id="qDateTo" class="form-control" placeholder="Đến ngày"></div>
-          <div class="col-md-2"><button class="btn btn-dark w-100" onclick="loadLogs()"><i class="fa-solid fa-search me-1"></i>Tìm</button></div>
+          <div class="col-md-2"><button id="loadLogsBtn" class="btn btn-dark w-100"><i class="fa-solid fa-search me-1"></i>Tìm</button></div>
         </div>
 
         <div class="table-responsive">
@@ -39,9 +39,9 @@
         <div class="d-flex justify-content-between mt-2">
           <small class="text-muted" id="logsPagination">-</small>
           <div>
-            <button class="btn btn-sm btn-outline-secondary me-1" id="logsPrev" onclick="logsPage(-1)">Trước</button>
+            <button class="btn btn-sm btn-outline-secondary me-1" id="logsPrev">Trước</button>
             <span id="logsPageNum">1</span>
-            <button class="btn btn-sm btn-outline-secondary ms-1" id="logsNext" onclick="logsPage(1)">Sau</button>
+            <button class="btn btn-sm btn-outline-secondary ms-1" id="logsNext">Sau</button>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@
     <div class="card">
       <div class="card-header">Thống kê theo ngày</div>
       <div class="card-body">
-        <button class="btn btn-outline-secondary btn-sm" onclick="loadLogStats()">Tải thống kê</button>
+        <button id="loadLogStatsBtn" class="btn btn-outline-secondary btn-sm">Tải thống kê</button>
         <div class="table-responsive mt-2">
           <table class="table table-sm" id="statsTable">
             <thead><tr><th>Ngày</th><th>Số bản ghi</th></tr></thead>
@@ -62,6 +62,7 @@
   </div>
 
   <script src="./js/api.js"></script>
-  <script src="./js/viewSystemLogs.js"></script>
+  <script src="./js/api.js?v=1"></script>
+  <script src="./js/viewSystemLogs.js?v=1"></script>
 </body>
 </html>

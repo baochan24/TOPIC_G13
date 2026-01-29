@@ -1,8 +1,8 @@
-if (typeof requireAuth === 'function' && !requireAuth('auth.html')) { /* redirect */ }
+if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect */ }
 var API_BASE = window.API_BASE || 'http://localhost:5000';
 var _logsPage = 1, _logsLimit = 20;
 
-function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : ''); }; }
+function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : '') }; }
 
 function loadLogs() {
   var q = '?page=' + _logsPage + '&limit=' + _logsLimit;
@@ -50,4 +50,16 @@ function loadLogStats() {
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; return; }
   loadLogs();
+
+  var loadBtn = document.getElementById('loadLogsBtn');
+  if (loadBtn) loadBtn.addEventListener('click', loadLogs);
+
+  var prevBtn = document.getElementById('logsPrev');
+  if (prevBtn) prevBtn.addEventListener('click', function() { logsPage(-1); });
+
+  var nextBtn = document.getElementById('logsNext');
+  if (nextBtn) nextBtn.addEventListener('click', function() { logsPage(1); });
+
+  var statsBtn = document.getElementById('loadLogStatsBtn');
+  if (statsBtn) statsBtn.addEventListener('click', loadLogStats);
 });

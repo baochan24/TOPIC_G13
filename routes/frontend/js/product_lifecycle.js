@@ -79,3 +79,8 @@ document.getElementById('imeiInput').addEventListener('keypress', function(e) {
     lookupLifecycle();
   }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+  var lookupBtn = document.getElementById('lookupLifecycleBtn');
+  if (lookupBtn) lookupBtn.addEventListener('click', lookupLifecycle);
+});

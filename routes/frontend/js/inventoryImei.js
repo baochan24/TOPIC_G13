@@ -2,8 +2,8 @@ const token = localStorage.getItem('token');
 if (!token) {
   window.location.href = 'auth.html';
 }
-if (typeof requireAuth === 'function' && !requireAuth('auth.html')) { /* redirect */ }
-var API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
+if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect */ }
+var API_BASE = '';
 var _lastLookupImei = '';
 
 function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (getToken ? getToken() : '') }; }
@@ -14,7 +14,7 @@ function importOne() {
   if (!productId || !imei) { alert('Nhập đủ Mã SP và IMEI'); return; }
   var condition = (document.getElementById('impCondition') || {}).value || 'NEW';
 
-  fetch(API_BASE + '/inventory/import', { method: 'POST', headers: hd(), body: JSON.stringify({ product_id: productId, imei_serial: imei, condition: condition }) })
+  fetch('/inventory/import', { method: 'POST', headers: hd(), body: JSON.stringify({ product_id: productId, imei_serial: imei, condition: condition }) })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(r) { if (r.ok || r.data.message) { alert(r.data.message || 'Nhập kho thành công'); document.getElementById('impImei').value = ''; } else alert(r.data.message || r.data.error || 'Lỗi'); })
     .catch(function() { alert('Lỗi kết nối'); });
@@ -27,7 +27,7 @@ function importBatch() {
   if (!productId || !arr.length) { alert('Nhập Mã SP và ít nhất 1 IMEI'); return; }
   var items = arr.map(function(imei) { return { imei_serial: imei, condition: 'NEW' }; });
 
-  fetch(API_BASE + '/inventory/import-batch', { method: 'POST', headers: hd(), body: JSON.stringify({ product_id: productId, items: items }) })
+  fetch('/inventory/import-batch', { method: 'POST', headers: hd(), body: JSON.stringify({ product_id: productId, items: items }) })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(r) {
       if (r.ok || r.data.imported != null) { alert('Nhập: ' + (r.data.imported || 0) + (r.data.failed && r.data.failed.length ? ', Lỗi: ' + r.data.failed.join(', ') : '')); document.getElementById('batchImeis').value = ''; }
@@ -41,7 +41,7 @@ function lookupImei() {
   if (!imei) { alert('Nhập IMEI'); return; }
   _lastLookupImei = imei;
 
-  fetch(API_BASE + '/inventory/imei/' + encodeURIComponent(imei), { headers: hd() })
+  fetch('/inventory/imei/' + encodeURIComponent(imei), { headers: hd() })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(r) {
       var res = document.getElementById('lookupResult');
@@ -63,14 +63,14 @@ function updateImeiStatus() {
   var status = (document.getElementById('newStatus') || {}).value;
   if (!imei || !status) { alert('Thiếu IMEI hoặc trạng thái'); return; }
 
-  fetch(API_BASE + '/inventory/imei/' + encodeURIComponent(imei) + '/status', { method: 'PUT', headers: hd(), body: JSON.stringify({ status: status }) })
+  fetch('/inventory/imei/' + encodeURIComponent(imei) + '/status', { method: 'PUT', headers: hd(), body: JSON.stringify({ status: status }) })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(r) { if (r.ok || (r.data && r.data.message)) { alert(r.data.message || 'Đã cập nhật'); lookupImei(); } else alert(r.data && r.data.message ? r.data.message : 'Lỗi'); })
     .catch(function() { alert('Lỗi kết nối'); });
 }
 
 function loadInventoryReport() {
-  fetch(API_BASE + '/inventory/', { headers: hd() })
+  fetch('/inventory/', { headers: hd() })
     .then(function(r) { if (r.status === 401) { window.location.href = 'auth.html'; return; } return r.json(); })
     .then(function(arr) {
       var t = document.querySelector('#reportTable tbody');
@@ -84,4 +84,19 @@ function loadInventoryReport() {
 
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; return; }
+
+  var importOneBtn = document.getElementById('importOneBtn');
+  if (importOneBtn) importOneBtn.addEventListener('click', importOne);
+
+  var importBatchBtn = document.getElementById('importBatchBtn');
+  if (importBatchBtn) importBatchBtn.addEventListener('click', importBatch);
+
+  var lookupImeiBtn = document.getElementById('lookupImeiBtn');
+  if (lookupImeiBtn) lookupImeiBtn.addEventListener('click', lookupImei);
+
+  var updateImeiStatusBtn = document.getElementById('updateImeiStatusBtn');
+  if (updateImeiStatusBtn) updateImeiStatusBtn.addEventListener('click', updateImeiStatus);
+
+  var loadInventoryReportBtn = document.getElementById('loadInventoryReportBtn');
+  if (loadInventoryReportBtn) loadInventoryReportBtn.addEventListener('click', loadInventoryReport);
 });

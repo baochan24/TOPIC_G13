@@ -1,4 +1,4 @@
-const API = window.API_BASE ? (window.API_BASE + '/categories') : 'http://127.0.0.1:5000/categories';
+const API = '/categories';
 const statsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('stats-update') : { postMessage: function(){} };
 
 function loadCategories() {
@@ -90,3 +90,8 @@ function deleteCategory(id) {
 
 loadCategories();
 if (typeof setInterval !== 'undefined') setInterval(loadCategories, 15000);
+
+document.addEventListener('DOMContentLoaded', function() {
+  var addBtn = document.getElementById('addCategoryBtn');
+  if (addBtn) addBtn.addEventListener('click', addCategory);
+});

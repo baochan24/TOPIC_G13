@@ -1,14 +1,14 @@
 // ===============================
-// API CONFIG (FIXED)
+// API CONFIG (FINAL)
 // ===============================
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'http://192.168.1.76:5000';
 window.API_BASE = API_BASE;
 
 // ===============================
 // TOKEN & ROLE
 // ===============================
 function getToken() {
-  return localStorage.getItem('token') || '';
+  return localStorage.getItem("token");
 }
 
 function setToken(token) {
@@ -19,22 +19,22 @@ function setRole(role) {
   if (role) localStorage.setItem('role', role);
 }
 
+function getRole() {
+  return localStorage.getItem('role') || '';
+}
+
 function clearAuth() {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
 }
 
-function getAuthHeaders(extra) {
-  const h = { 'Content-Type': 'application/json', ...(extra || {}) };
-  const t = getToken();
-  if (t) h['Authorization'] = 'Bearer ' + t;
-  return h;
-}
 
-function getRole() {
-  return localStorage.getItem('role') || '';
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + getToken()
+  };
 }
-
 function requireAuth(redirectUrl = 'auth.html') {
   if (!getToken()) {
     window.location.href = redirectUrl;

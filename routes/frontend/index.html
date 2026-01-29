@@ -19,15 +19,17 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./style/style.css?v=2">
   <script src="./js/api.js"></script>
-  <script>
-    // Check auth on load
-    if (typeof getToken === 'function' && !getToken()) {
-      window.location.href = 'auth.html';
-    }
-  </script>
 </head>
 
 <body>
+  <script>
+    // Check auth on load
+    window.onload = function() {
+      if (typeof getToken === 'function' && !getToken()) {
+        window.location.href = '/auth';
+      }
+    };
+  </script>
 
 <!-- SCRIPT HIỂN THỊ THỜI GIAN -->
 <script>
@@ -58,7 +60,7 @@
           <i class="fa-solid fa-user"></i>
         </div>
         <div>
-          <div class="fw-bold">Nhân viên kho</div>
+          <div class="fw-bold">ADMIN</div>
           <small class="text-muted">Online</small>
         </div>
       </div>
@@ -168,10 +170,15 @@
     <nav class="navbar navbar-light bg-light px-4 bg-light">
       <span class="fw-bold">Electronic Store Management</span>
 
-      <div class="text-muted small">
-        <i class="fa-regular fa-user"></i> Nhân viên kho |
-        <i class="fa-regular fa-clock"></i>
-        <span id="time"></span>
+      <div class="d-flex align-items-center">
+        <div class="text-muted small me-3">
+          <i class="fa-regular fa-user"></i> ADMIN |
+          <i class="fa-regular fa-clock"></i>
+          <span id="time"></span>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+          <i class="fa-solid fa-right-from-bracket me-1"></i>Đăng xuất
+        </button>
       </div>
     </nav>
 
@@ -353,7 +360,21 @@ document.addEventListener('DOMContentLoaded', function() {
     a.href = '#';
     a.onclick = function(e) { e.preventDefault(); if (typeof clearAuth === 'function') clearAuth(); location.href = 'index.html'; return false; };
   }
+
+  var logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
 });
+
+function logout() {
+  // Call backend logout to log the action
+  fetch('/auth/logout', {
+    method: 'POST',
+    headers: getAuthHeaders()
+  }).catch(err => console.log('Logout log failed:', err)).finally(() => {
+    if (typeof clearAuth === 'function') clearAuth();
+    window.location.href = '/auth';
+  });
+}
 
 setInterval(loadStatistics, 10000);
 var statsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('stats-update') : { onmessage: function(){} };
@@ -410,6 +431,16 @@ async function loadStatistics() {
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center">Lỗi tải dữ liệu</td></tr>';
   }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
+});
+
+<button id="logoutBtn" class="btn btn-danger btn-sm">
+  Đăng xuất
+</button>
+
 </script>
 
 </body>
