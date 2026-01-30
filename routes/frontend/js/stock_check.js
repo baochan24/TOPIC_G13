@@ -1,114 +1,150 @@
+// ===============================
+// AUTH CHECK
+// ===============================
 const token = localStorage.getItem('token');
 if (!token) {
   window.location.href = 'auth.html';
 }
 
+// ===============================
+// API + HEADERS
+// ===============================
+//const API_BASE = 'http://192.168.1.76:5000';
 
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  };
+}
 
-// Form scan IMEI
-document.getElementById('scanForm').addEventListener('submit', function(e) {
+// ===============================
+// BroadcastChannel
+// ===============================
+const statsChannel = new BroadcastChannel('stats-update');
+
+// ===============================
+// FORM SUBMIT – SCAN IMEI
+// ===============================
+document.getElementById('scanForm').addEventListener('submit', function (e) {
   e.preventDefault();
   scanImei();
 });
 
-// BroadcastChannel để đồng bộ dashboard
-const statsChannel = new BroadcastChannel('stats-update');
-
-// Scan IMEI
+// ===============================
+// SCAN IMEI
+// ===============================
 async function scanImei() {
-  const checkId = document.getElementById('checkId').value;
-  const imei = document.getElementById('imeiSerial').value;
-  const actualStatus = document.getElementById('actualStatus').value;
+  const checkId = document.getElementById('checkId').value.trim();
+  const imei = document.getElementById('imeiSerial').value.trim();
 
   if (!checkId || !imei) {
-    alert('Vui lòng nhập đầy đủ thông tin');
+    alert('Vui lòng nhập Check ID và IMEI');
     return;
   }
 
-  const data = {
-    imei_serial: imei,
-    actual_status: actualStatus
-  };
-
   try {
-    const response = await fetch(`/stock/${checkId}/scan`, {
+    const res = await fetch(`${API_BASE}/stock/${checkId}/scan`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ imei_serial: imei })
     });
-    const result = await response.json();
-    if (response.ok) {
-      alert(`Scan thành công: ${result.imei} - ${result.matched ? 'Khớp' : 'Không khớp'}`);
-      document.getElementById('scanForm').reset();
-      statsChannel.postMessage('update-stats'); // Đồng bộ dashboard
-    } else {
-      alert('Lỗi: ' + JSON.stringify(result));
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || 'Scan thất bại');
+      return;
     }
-  } catch (error) {
-    console.error('Lỗi scan IMEI:', error);
+
+    alert(`Scan thành công: ${data.imei_serial} (${data.actual_status})`);
+    document.getElementById('scanForm').reset();
+    loadResults();
+    statsChannel.postMessage('update-stats');
+
+  } catch (err) {
+    console.error('Lỗi scan IMEI:', err);
+    alert('Không thể kết nối server');
   }
 }
 
-// Load kết quả
+// ===============================
+// LOAD KẾT QUẢ KIỂM KÊ
+// ===============================
 async function loadResults() {
-  const checkId = document.getElementById('checkId').value;
+  const checkId = document.getElementById('checkId').value.trim();
   if (!checkId) {
     alert('Vui lòng nhập Check ID');
     return;
   }
 
   try {
-    const response = await fetch(`/stock/${checkId}/result`);
-    const results = await response.json();
+    const res = await fetch(`${API_BASE}/stock/${checkId}/result`, {
+      headers: getAuthHeaders()
+    });
+
+    const results = await res.json();
     const tbody = document.querySelector('#resultsTable tbody');
     tbody.innerHTML = '';
+
     results.forEach(item => {
       const row = `
         <tr>
           <td>${item.imei_serial}</td>
-          <td>${item.expected_status || 'N/A'}</td>
+          <td>${item.system_status || 'N/A'}</td>
           <td>${item.actual_status}</td>
-          <td>${item.is_matched ? 'Có' : 'Không'}</td>
+          <td>${item.is_matched ? '✔️' : '❌'}</td>
         </tr>
       `;
-      tbody.innerHTML += row;
+      tbody.insertAdjacentHTML('beforeend', row);
     });
-  } catch (error) {
-    console.error('Lỗi load kết quả:', error);
+
+  } catch (err) {
+    console.error('Lỗi load kết quả:', err);
   }
 }
 
-// Điều chỉnh stock
+
+// ===============================
+// ĐIỀU CHỈNH TỒN KHO
+// ===============================
 async function adjustStock() {
-  const checkId = document.getElementById('checkId').value;
+  const checkId = document.getElementById('checkId').value.trim();
   if (!checkId) {
     alert('Vui lòng nhập Check ID');
     return;
   }
 
   try {
-    const response = await fetch(`/stock/${checkId}/adjust`, {
+    const res = await fetch(`${API_BASE}/stock/${checkId}/adjust`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: getAuthHeaders()
     });
-    const result = await response.json();
+
+    const data = await res.json();
     const resultDiv = document.getElementById('adjustResult');
-    if (response.ok) {
-      resultDiv.innerHTML = `<div class="alert alert-success">${result.message}. Đã điều chỉnh ${result.adjusted_items} item.</div>`;
-      statsChannel.postMessage('update-stats'); // Đồng bộ dashboard
-    } else {
-      resultDiv.innerHTML = `<div class="alert alert-danger">Lỗi: ${JSON.stringify(result)}</div>`;
+
+    if (!res.ok) {
+      resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+      return;
     }
-  } catch (error) {
-    console.error('Lỗi điều chỉnh stock:', error);
-    document.getElementById('adjustResult').innerHTML = '<div class="alert alert-danger">Lỗi kết nối</div>';
+
+    resultDiv.innerHTML = `
+      <div class="alert alert-success">
+        ${data.message} – Đã điều chỉnh ${data.adjusted_items} IMEI
+      </div>
+    `;
+    statsChannel.postMessage('update-stats');
+
+  } catch (err) {
+    console.error('Lỗi điều chỉnh kho:', err);
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var loadBtn = document.getElementById('loadResultsBtn');
-  if (loadBtn) loadBtn.addEventListener('click', loadResults);
-
-  var adjustBtn = document.getElementById('adjustStockBtn');
-  if (adjustBtn) adjustBtn.addEventListener('click', adjustStock);
+// ===============================
+// BUTTON EVENTS
+// ===============================
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('loadResultsBtn')?.addEventListener('click', loadResults);
+  document.getElementById('adjustStockBtn')?.addEventListener('click', adjustStock);
 });

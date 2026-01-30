@@ -1,6 +1,3 @@
-if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; }
-var API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
-
 function lookupLifecycle() {
   const imei = document.getElementById('imeiInput').value.trim();
   if (!imei) {
@@ -9,78 +6,79 @@ function lookupLifecycle() {
   }
 
   fetch(API_BASE + '/lifecycle/' + encodeURIComponent(imei), {
-    headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
+    headers: typeof getAuthHeaders === 'function'
+      ? getAuthHeaders()
+      : { 'Authorization': 'Bearer ' + (getToken ? getToken() : localStorage.getItem('token') || '') }
   })
-  .then(response => response.json())
-  .then(data => {
-    const resultCard = document.getElementById('resultCard');
-    const productInfo = document.getElementById('productInfo');
-    const timeline = document.getElementById('lifecycleTimeline');
+    .then(r => {
+      if (!r.ok) return r.json().then(d => Promise.reject(d));
+      return r.json();
+    })
+    .then(data => {
+      const resultCard = document.getElementById('resultCard');
+      const productInfo = document.getElementById('productInfo');
+      const timelineEl = document.getElementById('lifecycleTimeline');
 
-    if (data.error || !data.product) {
-      resultCard.classList.add('d-none');
-      alert(data.error || 'IMEI không tồn tại');
-      return;
-    }
-
-    // Hiển thị thông tin sản phẩm
-    productInfo.innerHTML = `
-      <div class="row">
-        <div class="col-md-6">
-          <strong>IMEI:</strong> ${data.product.imei_serial}<br>
-          <strong>Sản phẩm:</strong> ${data.product.product_name}<br>
-          <strong>Hãng:</strong> ${data.product.brand}<br>
-        </div>
-        <div class="col-md-6">
-          <strong>Trạng thái hiện tại:</strong> <span class="status-badge status-${data.product.status.toLowerCase()}">${getStatusText(data.product.status)}</span><br>
-          <strong>Tình trạng:</strong> ${data.product.item_condition}<br>
-          <strong>Bảo hành:</strong> ${data.product.warranty_period} tháng<br>
-        </div>
-      </div>
-    `;
-
-    // Hiển thị timeline
-    timeline.innerHTML = '';
-    if (data.lifecycle && data.lifecycle.length > 0) {
-      data.lifecycle.forEach(item => {
-        const date = new Date(item.created_at).toLocaleString('vi-VN');
-        timeline.innerHTML += `
-          <div class="timeline-item">
-            <strong>${getStatusText(item.status)}</strong> - ${date}<br>
-            <small class="text-muted">${item.notes || ''}</small>
+      // ===== Thông tin sản phẩm =====
+      productInfo.innerHTML = `
+        <div class="row">
+          <div class="col-md-6">
+            <strong>IMEI:</strong> ${data.imei_serial}<br>
+            <strong>Sản phẩm:</strong> ${data.product.name}<br>
+            <strong>Hãng:</strong> ${data.product.brand}
           </div>
-        `;
-      });
-    } else {
-      timeline.innerHTML = '<div class="timeline-item">Chưa có lịch sử trạng thái</div>';
-    }
+          <div class="col-md-6">
+            <strong>Trạng thái hiện tại:</strong>
+            <span class="badge bg-info">${getStatusText(data.product.current_status)}</span><br>
+            <strong>Tình trạng:</strong> ${data.product.condition}<br>
+            <strong>Bảo hành:</strong> ${data.product.warranty_period} tháng
+          </div>
+        </div>
+      `;
 
-    resultCard.classList.remove('d-none');
-  })
-  .catch(error => {
-    console.error('Lỗi tra cứu:', error);
-    alert('Lỗi kết nối');
-  });
+      // ===== Timeline =====
+      timelineEl.innerHTML = '';
+      if (Array.isArray(data.timeline) && data.timeline.length) {
+        data.timeline.forEach(t => {
+          const time = t.time ? new Date(t.time).toLocaleString('vi-VN') : '';
+          timelineEl.innerHTML += `
+            <div class="timeline-item mb-2">
+              <strong>${t.event}</strong> – ${time}<br>
+              <small class="text-muted">${t.detail || ''} ${t.note || ''}</small>
+            </div>
+          `;
+        });
+      } else {
+        timelineEl.innerHTML =
+          '<div class="timeline-item">Chưa có lịch sử vòng đời</div>';
+      }
+
+      resultCard.classList.remove('d-none');
+    })
+    .catch(err => {
+      console.error('Lỗi tra cứu:', err);
+      alert(err.message || 'IMEI không tồn tại');
+    });
 }
 
 function getStatusText(status) {
-  const statusMap = {
+  const map = {
     'IN_STOCK': 'Trong kho',
     'SOLD': 'Đã bán',
     'WARRANTY': 'Bảo hành',
     'DEFECT': 'Lỗi'
   };
-  return statusMap[status] || status;
+  return map[status] || status;
 }
 
-// Enter key support
-document.getElementById('imeiInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    lookupLifecycle();
-  }
-});
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('lookupLifecycleBtn');
+  if (btn) btn.addEventListener('click', lookupLifecycle);
 
-document.addEventListener('DOMContentLoaded', function() {
-  var lookupBtn = document.getElementById('lookupLifecycleBtn');
-  if (lookupBtn) lookupBtn.addEventListener('click', lookupLifecycle);
+  const input = document.getElementById('imeiInput');
+  if (input) {
+    input.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') lookupLifecycle();
+    });
+  }
 });

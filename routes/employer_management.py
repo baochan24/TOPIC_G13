@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from db import get_db_connection
 from utils.hash import hash_password
-from utils.auth_middleware import token_required
+from utils.auth_middleware import token_required,g
 import uuid
 import re
 
@@ -21,7 +21,7 @@ def is_admin(cursor, user_id):
 
 
 def is_valid_email(email):
-    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email) 
 
 
 def is_valid_phone(phone):
@@ -42,7 +42,9 @@ def write_log(cursor, admin_id, action):
 # ================== 1. XEM DANH SÁCH ==================
 @admin_bp.route("/staff", methods=["GET"])
 @token_required
-def list_staff(current_user_id):
+def list_staff():
+    current_user_id = g.user_id   # ✅ FIX
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -67,7 +69,8 @@ def list_staff(current_user_id):
 # ================== 2. THÊM NHÂN VIÊN ==================
 @admin_bp.route("/staff", methods=["POST"])
 @token_required
-def add_staff(current_user_id):
+def add_staff():
+    current_user_id = g.user_id
     data = request.json
 
     username  = data.get("username")
@@ -75,29 +78,29 @@ def add_staff(current_user_id):
     full_name = data.get("full_name")
     email     = data.get("email")
     phone     = data.get("phone")
-    role_id   = data.get("role_id")
+    role_name = data.get("role_name")
 
-    # Trường bắt buộc (*)
-    if not all([username, password, full_name, role_id]):
+    if not all([username, password, full_name, role_name]):
         return jsonify({"message": "Thiếu trường bắt buộc (*)"}), 400
 
-    if email and not is_valid_email(email):
-        return jsonify({"message": "Email không hợp lệ"}), 400
-
-    if phone and not is_valid_phone(phone):
-        return jsonify({"message": "Số điện thoại không hợp lệ"}), 400
-
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     try:
         if not is_admin(cursor, current_user_id):
             return jsonify({"message": "Không có quyền"}), 403
 
-        # Kiểm tra trùng tài khoản
         cursor.execute("SELECT 1 FROM users WHERE username=%s", (username,))
         if cursor.fetchone():
             return jsonify({"message": "Tài khoản đã tồn tại"}), 400
+
+        cursor.execute(
+            "SELECT role_id FROM roles WHERE role_name=%s",
+            (role_name,)
+        )
+        role = cursor.fetchone()
+        if not role:
+            return jsonify({"message": "Vai trò không hợp lệ"}), 400
 
         user_id = "NV" + uuid.uuid4().hex[:6].upper()
         pw_hash = hash_password(password)
@@ -110,7 +113,7 @@ def add_staff(current_user_id):
         cursor.execute("""
             INSERT INTO user_roles (user_id, role_id)
             VALUES (%s, %s)
-        """, (user_id, role_id))
+        """, (user_id, role["role_id"]))
 
         write_log(cursor, current_user_id, f"Thêm nhân viên {user_id}")
 
@@ -125,11 +128,11 @@ def add_staff(current_user_id):
         cursor.close()
         conn.close()
 
-
 # ================== 3. SỬA NHÂN VIÊN ==================
 @admin_bp.route("/staff/<user_id>", methods=["PUT"])
 @token_required
-def update_staff(current_user_id, user_id):
+def update_staff(user_id):
+    current_user_id = g.user_id   # ✅ FIX
     data = request.json
 
     conn = get_db_connection()
@@ -184,7 +187,8 @@ def update_staff(current_user_id, user_id):
 # ================== 4. XÓA NHÂN VIÊN ==================
 @admin_bp.route("/staff/<user_id>", methods=["DELETE"])
 @token_required
-def delete_staff(current_user_id, user_id):
+def delete_staff(user_id):
+    current_user_id = g.user_id   # ✅ FIX
     if current_user_id == user_id:
         return jsonify({"message": "Không thể xóa chính mình"}), 400
 

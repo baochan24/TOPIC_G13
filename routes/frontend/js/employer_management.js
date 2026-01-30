@@ -1,6 +1,6 @@
-if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; }
-var API_BASE = '';
-const statsChannel = new BroadcastChannel('stats-update');
+//if (typeof getToken === 'function' && !getToken()) { window.location.href = 'auth.html'; }
+//var API_BASE = '';
+//const statsChannel = new BroadcastChannel('stats-update');
 
 // Load danh sách nhân viên khi trang load
 document.addEventListener('DOMContentLoaded', function() {
@@ -65,7 +65,7 @@ async function addStaff() {
     phone: document.getElementById('phone').value.trim(),
     full_name: document.getElementById('fullName').value.trim(),
     address: document.getElementById('address').value.trim(),
-    role: document.getElementById('role').value
+    role_name: document.getElementById('role').value   // ✅ FIX
   };
 
   if (!data.username || !data.password || !data.email || !data.phone || !data.full_name) {

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from db import get_db_connection
-from utils.auth_middleware import require_auth, require_role
+from utils.auth_middleware import require_auth, require_role,g
 import uuid
 
 create_order_bp = Blueprint("create_orders", __name__, url_prefix="/orders")
@@ -20,7 +20,7 @@ def checkout():
     if not imeis:
         return jsonify({"message": "Thiếu IMEI"}), 400
 
-    staff_id = request.user["sub"]
+    staff_id = g.user_id  # ✅ FIX QUAN TRỌNG NHẤT
 
     conn = get_db_connection()
     cur = conn.cursor(dictionary=True)

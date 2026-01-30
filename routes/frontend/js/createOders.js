@@ -3,7 +3,7 @@ console.log('CREATE ORDERS JS LOADED');
 /* =========================
    CONFIG
 ========================= */
-const API_BASE = 'http://127.0.0.1:5000';
+//const API_BASE = 'http://127.0.0.1:5000';
 
 /* =========================
    AUTH GUARD
@@ -12,7 +12,7 @@ if (typeof requireAuth === 'function') {
   const ok = requireAuth('/auth');
   if (!ok) {
     console.warn('Auth failed – redirecting');
-    return;
+    
   }
 }
 

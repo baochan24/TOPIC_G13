@@ -24,9 +24,11 @@
 <body>
   <script>
     // Check auth on load
-    window.onload = function() {
-      if (typeof getToken === 'function' && !getToken()) {
-        window.location.href = '/auth';
+  window.onload = function () {
+  if (typeof getToken === 'function') {
+    if (!getToken()) {
+      window.location.href = 'auth.html';
+    }
       }
     };
   </script>
@@ -61,7 +63,7 @@
         </div>
         <div>
           <div class="fw-bold">ADMIN</div>
-          <small class="text-muted">Online</small>
+          <small class="fw-bold">Online</small>
         </div>
       </div>
     </div>
@@ -348,9 +350,7 @@
   </main>
 </div>
 
-<script src="js/api.js"></script>
 <script>
-var _apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : 'http://localhost:5000';
 
 document.addEventListener('DOMContentLoaded', function() {
   loadStatistics();
@@ -442,7 +442,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </button>
 
 </script>
+<script>
+   function logout() {
+    fetch(API_BASE + '/auth/logout', {
+      method: 'POST',
+      headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}
+    })
+    .catch(err => console.log('Logout log failed:', err))
+    .finally(() => {
+      if (typeof clearAuth === 'function') clearAuth();
+      window.location.href = '/auth';
+    });
+  }
 
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('logoutBtn');
+    if (btn) btn.addEventListener('click', logout);
+  });
+  
+</script>
 </body>
 </html>
 

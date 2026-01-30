@@ -1,63 +1,98 @@
-
-#kiem ke kho theo imei
+# KIỂM KÊ KHO THEO IMEI – FINAL
 from flask import Blueprint, request, jsonify
 from db import get_db_connection
+from utils.auth_middleware import require_auth, require_role
 
-stock_bp = Blueprint("stock_check", __name__, url_prefix="/stock")  
+stock_bp = Blueprint("stock", __name__, url_prefix="/stock")
 
 
-@stock_bp.route("/<int:check_id>/scan", methods=["POST"])
-def scan_imei(check_id):
+# =====================================================
+# SCAN IMEI
+# =====================================================
+@stock_bp.route("/<ticket_id>/scan", methods=["POST"])
+@require_auth
+@require_role("ADMIN", "STAFF")
+def scan_imei(ticket_id):
     data = request.get_json()
     imei = data.get("imei_serial")
-    actual_status = data.get("actual_status")
+
+    if not imei:
+        return jsonify({"message": "Thiếu IMEI"}), 400
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute(
-        "SELECT status FROM items WHERE imei_serial = %s",
-        (imei,)
-    )
-    item = cursor.fetchone()
+    try:
+        # 1. Kiểm tra phiếu kiểm kê
+        cursor.execute(
+            "SELECT ticket_id FROM inventory_tickets WHERE ticket_id=%s",
+            (ticket_id,)
+        )
+        if not cursor.fetchone():
+            return jsonify({"message": "Phiếu kiểm kê không tồn tại"}), 404
 
-    if item:
-        expected_status = item["status"]
-        is_matched = (expected_status == actual_status)
-    else:
-        expected_status = None
-        is_matched = False
-        actual_status = "EXTRA"
+        # 2. Kiểm tra IMEI trong hệ thống
+        cursor.execute(
+            "SELECT status FROM items WHERE imei_serial=%s",
+            (imei,)
+        )
+        item = cursor.fetchone()
 
-    cursor.execute("""
-        INSERT INTO stock_check_items
-        (check_id, imei_serial, expected_status, actual_status, is_matched)
-        VALUES (%s,%s,%s,%s,%s)
-    """, (check_id, imei, expected_status, actual_status, is_matched))
+        actual_status = "FOUND" if item else "EXTRA"
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        # 3. Check IMEI đã scan chưa
+        cursor.execute("""
+            SELECT id FROM inventory_ticket_items
+            WHERE ticket_id=%s AND imei_serial=%s
+        """, (ticket_id, imei))
 
-    return jsonify({
-        "imei": imei,
-        "expected_status": expected_status,
-        "actual_status": actual_status,
-        "matched": is_matched
-    }), 201
+        if cursor.fetchone():
+            return jsonify({"message": "IMEI đã được scan"}), 400
+
+        # 4. Ghi nhận kết quả scan
+        cursor.execute("""
+            INSERT INTO inventory_ticket_items
+            (ticket_id, imei_serial, actual_status)
+            VALUES (%s, %s, %s)
+        """, (ticket_id, imei, actual_status))
+
+        conn.commit()
+
+        return jsonify({
+            "imei_serial": imei,
+            "actual_status": actual_status
+        }), 201
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"message": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
-
-@stock_bp.route("/<int:check_id>/result", methods=["GET"])
-def check_result(check_id):
+# =====================================================
+# XEM KẾT QUẢ KIỂM KÊ
+# =====================================================
+@stock_bp.route("/<ticket_id>/result", methods=["GET"])
+@require_auth
+@require_role("ADMIN", "STAFF")
+def check_result(ticket_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT imei_serial, expected_status, actual_status, is_matched
-        FROM stock_check_items
-        WHERE check_id = %s
-    """, (check_id,))
+        SELECT 
+            s.imei_serial,
+            s.expected_status AS system_status,
+            s.actual_status,
+            s.is_matched,
+            s.scanned_at
+        FROM stock_check_items s
+        WHERE s.check_id = %s
+        ORDER BY s.scanned_at ASC
+    """, (ticket_id,))
 
     data = cursor.fetchall()
     cursor.close()
@@ -66,50 +101,45 @@ def check_result(check_id):
     return jsonify(data), 200
 
 
-@stock_bp.route("/<int:check_id>/adjust", methods=["POST"])
-def adjust_stock(check_id):
+# =====================================================
+# ĐIỀU CHỈNH TỒN KHO SAU KIỂM KÊ
+# =====================================================
+@stock_bp.route("/<ticket_id>/adjust", methods=["POST"])
+@require_auth
+@require_role("ADMIN")
+def adjust_stock(ticket_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 1. Lấy các IMEI KHÔNG KHỚP
     cursor.execute("""
-        SELECT imei_serial, expected_status, actual_status
-        FROM stock_check_items
-        WHERE check_id = %s
-          AND is_matched = 0
-    """, (check_id,))
-    mismatches = cursor.fetchall()
+        SELECT it.imei_serial, it.actual_status
+        FROM inventory_ticket_items it
+        WHERE it.ticket_id = %s
+    """, (ticket_id,))
 
-    if not mismatches:
-        return jsonify({"message": "No adjustment needed"}), 200
+    rows = cursor.fetchall()
+    adjusted = 0
 
-    # 2. Điều chỉnh tồn kho
-    for item in mismatches:
-        imei = item["imei_serial"]
-        actual_status = item["actual_status"]
+    for r in rows:
+        imei = r["imei_serial"]
+        actual = r["actual_status"]
 
-        if actual_status == "MISSING":
+        if actual == "FOUND":
             cursor.execute("""
-                UPDATE items
-                SET status = 'DEFECT'
-                WHERE imei_serial = %s
+                UPDATE items SET status='IN_STOCK'
+                WHERE imei_serial=%s
             """, (imei,))
+            adjusted += 1
 
-        elif actual_status == "IN_STOCK":
-            cursor.execute("""
-                UPDATE items
-                SET status = 'IN_STOCK'
-                WHERE imei_serial = %s
-            """, (imei,))
-
-        # EXTRA → chỉ ghi nhận, KHÔNG auto thêm vào hệ thống
+        elif actual == "EXTRA":
+            # EXTRA: không tự động thêm – chỉ ghi nhận
+            pass
 
     conn.commit()
     cursor.close()
     conn.close()
 
     return jsonify({
-        "message": "Stock adjusted successfully",
-        "adjusted_items": len(mismatches)
+        "message": "Đã điều chỉnh tồn kho",
+        "adjusted_items": adjusted
     }), 200
-

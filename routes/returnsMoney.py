@@ -46,7 +46,7 @@ def list_return_requests():
 # ======================
 @returnsMoney_bp.post("/request")
 @require_auth
-@require_role("customer")
+@require_role("STAFF")
 def request_return():
     data = request.get_json() or {}
     order_item_id = data.get("order_item_id")
@@ -58,19 +58,17 @@ def request_return():
     with db_cursor() as (_, cur):
         ip = request.remote_addr
 
-        # kiểm tra order_item thuộc customer
+        # Staff chỉ cần order_item tồn tại
         cur.execute(
             """
-            SELECT o.customer_id
+            SELECT oi.order_item_id
             FROM order_items oi
-            JOIN orders o ON o.order_id = oi.order_id
             WHERE oi.order_item_id=%s
             """,
             (order_item_id,),
         )
-        row = cur.fetchone()
-        if not row or row["customer_id"] != request.user["sub"]:
-            return jsonify({"message": "Không có quyền trả hàng"}), 403
+        if not cur.fetchone():
+            return jsonify({"message": "Order item không tồn tại"}), 404
 
         return_id = _gen_id("RET", 10)
         cur.execute(

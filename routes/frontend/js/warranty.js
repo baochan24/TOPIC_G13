@@ -1,5 +1,4 @@
-if (typeof requireAuth === 'function' && !requireAuth('/auth')) { /* redirect - warranty backend không bắt auth nhưng vẫn dùng staff_id */ }
-var API_BASE = window.API_BASE || 'http://localhost:5000';
+
 
 function hd() { return typeof getAuthHeaders === 'function' ? getAuthHeaders() : { 'Content-Type': 'application/json' }; }
 

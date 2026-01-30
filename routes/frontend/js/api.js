@@ -1,7 +1,9 @@
 // ===============================
 // API CONFIG (FINAL)
 // ===============================
-const API_BASE = 'http://192.168.1.76:5000';
+if (!window.API_BASE) {
+  window.API_BASE = 'http://192.168.1.76:5000';
+}
 window.API_BASE = API_BASE;
 
 // ===============================

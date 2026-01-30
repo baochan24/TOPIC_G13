@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-# from flask_cors import CORS  # Removed: same origin, no CORS needed
+
 
 # ===== IMPORT BLUEPRINT =====
 from routes.auth import authLogin_bp 
@@ -15,7 +15,7 @@ from routes.reports import reports_bp
 from routes.returnsMoney import returnsMoney_bp
 from routes.createOders import create_order_bp
 from routes.employer_management import admin_bp
-
+from routes.product_lifecycle import lifecycle_bp
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ems-secret-key-123'
 
@@ -39,7 +39,7 @@ app.register_blueprint(customers_bp)
 app.register_blueprint(create_order_bp)
 app.register_blueprint(view_logs_bp)
 app.register_blueprint(admin_bp)
-
+app.register_blueprint(lifecycle_bp)
 # ===== FRONTEND ROUTES =====
 @app.route('/')
 def index():

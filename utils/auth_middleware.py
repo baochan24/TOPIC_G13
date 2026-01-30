@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify,g
 import jwt
 from datetime import datetime, timedelta, timezone
 
@@ -8,10 +8,12 @@ SECRET = "SECRET_KEY_ELECTRONIC_STORE"
 # ================= TOKEN =================
 def generate_token(user_id, role):
     payload = {
-        "sub": str(user_id),
+        "user_id": user_id,
         "role": role,
-        "exp": datetime.now(timezone.utc) + timedelta(hours=8)
+        "exp": datetime.utcnow() + timedelta(hours=8)
     }
+    
+
     token = jwt.encode(payload, SECRET, algorithm="HS256")
     if isinstance(token, bytes):
         token = token.decode("utf-8")
@@ -35,6 +37,8 @@ def token_required(fn):
 
         try:
             payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+            g.user_id= payload["user_id"]  # ✅ FIX QUAN TRỌNG NHẤT
+            g.role= payload["role"]
         except jwt.ExpiredSignatureError:
             return jsonify({"message": "Token expired"}), 401
         except Exception:

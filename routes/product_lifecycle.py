@@ -1,5 +1,4 @@
-
-#Tra cuu vong doi san pham theo IMEI
+# Tra cứu vòng đời sản phẩm theo IMEI
 from flask import Blueprint, request, jsonify
 from db import db_cursor
 from utils.auth_middleware import require_auth
@@ -22,17 +21,13 @@ def _log(cur, user_id, action, ip):
 @lifecycle_bp.get("/<imei_serial>")
 @require_auth
 def get_product_lifecycle(imei_serial):
-    """
-    Use-case 15: Truy xuất vòng đời sản phẩm theo IMEI
-    """
     role = request.user.get("role")
     ip = request.remote_addr
 
+    # ✅ FIX Ở ĐÂY
     with db_cursor() as (_, cur):
 
-        # =========================
-        # 1. Kiểm tra IMEI tồn tại
-        # =========================
+        # 1. Kiểm tra IMEI
         cur.execute(
             """
             SELECT i.imei_serial,
@@ -53,9 +48,7 @@ def get_product_lifecycle(imei_serial):
 
         timeline = []
 
-        # =========================
-        # 2. Lịch sử kiểm kê / kho
-        # =========================
+        # 2. Lịch sử kiểm kê
         cur.execute(
             """
             SELECT it.check_date,
@@ -76,9 +69,7 @@ def get_product_lifecycle(imei_serial):
                 "note": r["note"]
             })
 
-        # =========================
-        # 3. Lịch sử bán hàng
-        # =========================
+        # 3. Lịch sử bán
         cur.execute(
             """
             SELECT o.order_date,
@@ -99,9 +90,7 @@ def get_product_lifecycle(imei_serial):
                 "customer_id": order["customer_id"]
             })
 
-        # =========================
-        # 4. Lịch sử bảo hành
-        # =========================
+        # 4. Bảo hành
         cur.execute(
             """
             SELECT check_date, note, staff_id
@@ -119,25 +108,19 @@ def get_product_lifecycle(imei_serial):
                 "staff_id": w["staff_id"]
             })
 
-        # =========================
-        # 5. Sắp xếp timeline
-        # =========================
+        # 5. Sắp xếp
         timeline.sort(key=lambda x: x["time"] or "")
 
-        # =========================
-        # 6. Ẩn dữ liệu theo quyền
-        # =========================
+        # 6. Ẩn dữ liệu cho customer
         if role == "customer":
             for t in timeline:
                 t.pop("staff_id", None)
                 t.pop("note", None)
 
-        # =========================
-        # 7. Ghi log truy vấn
-        # =========================
+        # 7. Log
         _log(
             cur,
-            request.user["sub"],
+            request.user["user_id"],
             f"TRACE_PRODUCT_LIFECYCLE IMEI={imei_serial}",
             ip,
         )
@@ -152,4 +135,4 @@ def get_product_lifecycle(imei_serial):
                 "warranty_period": item["warranty_period"]
             },
             "timeline": timeline
-        })
+        }), 200
